@@ -1,0 +1,7 @@
+{
+  "name": "gati-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

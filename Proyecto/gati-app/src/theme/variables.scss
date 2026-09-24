@@ -1,0 +1,23 @@
+// For information on how to create your own theme, please refer to:
+// https://ionicframework.com/docs/theming/
+:root {
+  /* Azul Rey del logo (Botones principales) */
+  --ion-color-primary: #1565c0;
+  --ion-color-primary-rgb: 21,101,192;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #1259a9;
+  --ion-color-primary-tint: #2c74c6;
+
+  /* Celeste del logo (Acentos, notificaciones o iconos) */
+  --ion-color-secondary: #00b4d8;
+  --ion-color-secondary-rgb: 0,180,216;
+  --ion-color-secondary-contrast: #ffffff;
+
+  /* Azul Marino Oscuro (Textos principales o cabeceras) */
+  --ion-color-tertiary: #0a192f;
+  --ion-color-tertiary-rgb: 10,25,47;
+  --ion-color-tertiary-contrast: #ffffff;
+
+  /* Fondo minimalista (Gris casi blanco para resaltar las tarjetas) */
+  --ion-background-color: #f8f9fa;
+}

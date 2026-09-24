@@ -1,0 +1,48 @@
+<ion-content scroll-y="false">
+  <div class="split-layout">
+
+    <!-- LADO IZQUIERDO: Formulario -->
+    <div class="form-section">
+      <div class="form-wrapper">
+        <!-- Reemplaza el src si le pusiste otro nombre a la imagen -->
+        <img src="assets/LogoGatti.png" alt="Logo GATI" class="logo">
+
+        <h1 class="title">Iniciar Sesión</h1>
+        <p class="subtitle">Ingresa tus credenciales corporativas</p>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+
+          <!-- Usamos fill="outline" para imitar las cajas de tu referencia -->
+          <ion-input
+            type="email"
+            fill="outline"
+            label="Correo Electrónico"
+            labelPlacement="floating"
+            formControlName="email"
+            class="ion-margin-bottom custom-input">
+          </ion-input>
+
+          <ion-input
+            type="password"
+            fill="outline"
+            label="Contraseña"
+            labelPlacement="floating"
+            formControlName="password"
+            class="ion-margin-bottom custom-input">
+          </ion-input>
+
+          <ion-button expand="block" type="submit" color="primary" class="login-btn" [disabled]="!loginForm.valid">
+            Ingresar
+          </ion-button>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- LADO DERECHO: Imagen Decorativa -->
+    <div class="image-section">
+      <!-- Aquí puedes poner un fondo azul o una imagen del MOP más adelante -->
+    </div>
+
+  </div>
+</ion-content>

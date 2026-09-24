@@ -1,0 +1,73 @@
+.split-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* --- LADO IZQUIERDO --- */
+.form-section {
+  flex: 1; /* Toma la mitad de la pantalla */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 2rem;
+
+  .form-wrapper {
+    width: 100%;
+    max-width: 400px; /* Ancho máximo para que no se vea gigante */
+  }
+
+  .logo {
+    max-width: 200px;
+    margin-bottom: 2rem;
+  }
+
+  .title {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700; /* Bold */
+    font-size: 2rem;
+    color: var(--ion-color-tertiary);
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600; /* Semi Bold */
+    color: #666666;
+    margin-bottom: 2.5rem;
+  }
+
+  .custom-input {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400; /* Normal */
+    --border-radius: 8px;
+  }
+
+  .login-btn {
+    margin-top: 1.5rem;
+    --border-radius: 8px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    height: 50px;
+  }
+}
+
+/* --- LADO DERECHO --- */
+.image-section {
+  flex: 1; /* Toma la otra mitad */
+  /* Por ahora usaremos un gradiente azul elegante.
+     Puedes cambiar el 'url()' luego por una foto de activos o del MOP */
+  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Responsividad: Si se ve en celular, ocultamos la imagen derecha */
+@media (max-width: 768px) {
+  .image-section {
+    display: none;
+  }
+}
