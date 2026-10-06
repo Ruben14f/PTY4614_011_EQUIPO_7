@@ -1,1 +1,11 @@
-
+.menu-item {
+  --padding-start: 20px;
+  --color: #333;
+  margin-bottom: 5px;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+}
+.menu-item ion-icon {
+  color: var(--ion-color-primary);
+}

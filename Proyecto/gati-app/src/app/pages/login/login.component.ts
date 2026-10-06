@@ -4,10 +4,12 @@ import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 
+// 1. Añadimos el ToastController a nuestras importaciones
 import {
   IonContent,
   IonInput,
-  IonButton
+  IonButton,
+  ToastController
 } from '@ionic/angular';
 
 @Component({
@@ -30,7 +32,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private auth: Auth,
-    private router: Router
+    private router: Router,
+    private toastController: ToastController // 2. Inyectamos la herramienta aquí
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -43,7 +46,6 @@ export class LoginComponent implements OnInit {
   async onLogin() {
     if (this.loginForm.valid) {
 
-      // Quitamos el foco del botón para evitar advertencias de accesibilidad
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
@@ -56,7 +58,15 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/tabs/tab1']);
       } catch (error) {
         console.error('Error al iniciar sesión:', error);
-        alert('Credenciales incorrectas o el usuario no existe. Intente nuevamente.');
+
+        // 3. Creamos la notificación corporativa de error
+        const toast = await this.toastController.create({
+          message: 'Credenciales incorrectas o usuario inexistente.',
+          duration: 3000, // Desaparece en 3 segundos
+          position: 'top',
+          color: 'danger' // Color rojo de Ionic
+        });
+        await toast.present();
       }
     }
   }

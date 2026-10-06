@@ -1,17 +1,159 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <ion-title>Panel de Activos GATI</ion-title>
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onLogout()" title="Cerrar Sesión"><ion-icon slot="icon-only" name="log-out-outline"></ion-icon></ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true" class="ion-padding background-light">
+  <div class="welcome-section">
+    <h1 class="main-title">Resumen de Activos</h1>
+    <p class="subtitle">Gestión centralizada del inventario tecnológico.</p>
+  </div>
 
-  <h1>Bienvenido al sistema</h1>
-  <p>Has ingresado exitosamente con tus credenciales corporativas.</p>
+  <div class="segment-container">
+    <ion-segment [(ngModel)]="viewMode" color="primary">
+      <ion-segment-button value="hardware"><ion-label>Hardware</ion-label></ion-segment-button>
+      <ion-segment-button value="software"><ion-label>Licencias</ion-label></ion-segment-button>
+    </ion-segment>
+  </div>
 
-  <!-- Botón para cerrar sesión -->
-  <ion-button color="danger" expand="block" (click)="onLogout()" class="ion-margin-top">
-    Cerrar Sesión
-  </ion-button>
+  <!-- TARJETAS DE KPIs (COMUNES) -->
+  <ion-grid class="ion-margin-top">
+    <ion-row>
+      <ion-col size="6" size-md="3">
+        <ion-card class="stat-card">
+          <ion-card-content class="stat-content">
+            <div class="icon-box blue-box"><ion-icon name="desktop-outline"></ion-icon></div>
+            <div class="data-box"><h2>{{ currentStats.total }}</h2><p>Totales</p></div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="3">
+        <ion-card class="stat-card">
+          <ion-card-content class="stat-content">
+            <div class="icon-box green-box"><ion-icon name="checkmark-circle-outline"></ion-icon></div>
+            <div class="data-box"><h2>{{ currentStats.asignados }}</h2><p>Asignados</p></div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="3">
+        <ion-card class="stat-card">
+          <ion-card-content class="stat-content">
+            <div class="icon-box yellow-box"><ion-icon name="time-outline"></ion-icon></div>
+            <div class="data-box"><h2>{{ currentStats.inventario }}</h2><p>Inventario</p></div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6" size-md="3">
+        <ion-card class="stat-card">
+          <ion-card-content class="stat-content">
+            <div class="icon-box red-box"><ion-icon name="close-circle-outline"></ion-icon></div>
+            <div class="data-box"><h2>{{ currentStats.baja }}</h2><p>De baja</p></div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
 
+    <!-- BLOQUE EXCLUSIVO PARA HARDWARE -->
+    @if (viewMode === 'hardware') {
+      <ion-row>
+        <!-- Gráfico Dona -->
+        <ion-col size="12" size-md="4">
+          <ion-card class="chart-card">
+            <ion-card-header><ion-card-title>Distribución por Tipo</ion-card-title></ion-card-header>
+            <ion-card-content><div class="chart-container"><canvas baseChart [data]="hwDonutData" [options]="donutOptions" type="doughnut"></canvas></div></ion-card-content>
+          </ion-card>
+        </ion-col>
+        <!-- Gráfico Línea Histórica -->
+        <ion-col size="12" size-md="8">
+          <ion-card class="chart-card">
+            <ion-card-header><ion-card-title>Histórico de Precios</ion-card-title></ion-card-header>
+            <ion-card-content><div class="chart-container"><canvas baseChart [data]="hwLineData" [options]="lineOptions" type="line"></canvas></div></ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <!-- Obsolescencia (> 6 años) -->
+        <ion-col size="12" size-md="6">
+          <ion-card class="table-card">
+            <ion-card-header><ion-card-title>Alerta de Obsolescencia (> 6 años)</ion-card-title></ion-card-header>
+            <ion-card-content>
+              <table class="custom-table">
+                <thead><tr><th>Serie</th><th>Equipo</th><th>Años</th></tr></thead>
+                <tbody>
+                  @for (item of obsoleteHardware; track item.serie) {
+  <tr>
+    <td>{{item.serie}}</td>
+    <td>{{item.tipo}}</td>
+    <td class="danger-text"><strong>{{item.anios}} años</strong></td>
+  </tr>
+}
+                </tbody>
+              </table>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+        <!-- Últimas Órdenes -->
+        <ion-col size="12" size-md="6">
+          <ion-card class="table-card">
+            <ion-card-header><ion-card-title>Últimas Órdenes de Compra</ion-card-title></ion-card-header>
+            <ion-card-content>
+              <table class="custom-table">
+                <thead><tr><th>N° OC</th><th>Proveedor</th><th>Estado</th></tr></thead>
+                <tbody>
+                  @for (order of recentOrders; track order.oc) {
+                    <tr><td>{{order.oc}}</td><td>{{order.proveedor}}</td><td><span class="badge">{{order.estado}}</span></td></tr>
+                  }
+                </tbody>
+              </table>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    }
+
+    <!-- BLOQUE EXCLUSIVO PARA LICENCIAS -->
+    @else {
+      <ion-row>
+        <!-- Gráfico Dona Licencias -->
+        <ion-col size="12" size-md="4">
+          <ion-card class="chart-card">
+            <ion-card-header><ion-card-title>Licencias por Producto</ion-card-title></ion-card-header>
+            <ion-card-content><div class="chart-container"><canvas baseChart [data]="swDonutData" [options]="donutOptions" type="doughnut"></canvas></div></ion-card-content>
+          </ion-card>
+        </ion-col>
+        <!-- Gráfico Línea Histórica Licencias -->
+        <ion-col size="12" size-md="8">
+          <ion-card class="chart-card">
+            <ion-card-header><ion-card-title>Gasto Anual en Software</ion-card-title></ion-card-header>
+            <ion-card-content><div class="chart-container"><canvas baseChart [data]="swLineData" [options]="lineOptions" type="line"></canvas></div></ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <!-- Últimas Órdenes Licencias (Full width) -->
+        <ion-col size="12">
+          <ion-card class="table-card">
+            <ion-card-header><ion-card-title>Últimas Renovaciones / Compras</ion-card-title></ion-card-header>
+            <ion-card-content>
+              <table class="custom-table">
+                <thead><tr><th>N° OC</th><th>Proveedor</th><th>Fecha</th><th>Monto</th></tr></thead>
+                <tbody>
+                  @for (order of recentOrders; track order.oc) {
+                    <tr><td>{{order.oc}}</td><td>{{order.proveedor}}</td><td>{{order.fecha}}</td><td>{{order.monto}}</td></tr>
+                  }
+                </tbody>
+              </table>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    }
+  </ion-grid>
 </ion-content>

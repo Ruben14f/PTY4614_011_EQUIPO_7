@@ -1,0 +1,56 @@
+/* Contenedor para mantener proporciones de los gráficos */
+.chart-container {
+  position: relative;
+  height: 250px;
+  width: 100%;
+}
+
+.chart-card, .table-card {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  border-radius: 12px;
+  background: #ffffff;
+
+  ion-card-title {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+  }
+}
+
+/* Estilos de Tabla Nativa tipo SaaS */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Open Sans', sans-serif;
+
+  th {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #eee;
+    color: #666;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+    font-size: 0.9rem;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.danger-text { color: #dc3545; }
+.badge {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
