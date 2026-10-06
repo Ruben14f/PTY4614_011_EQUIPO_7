@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 
-// Solo importamos las 3 piezas visuales que sobrevivieron en el nuevo diseño
 import {
   IonContent,
   IonInput,
@@ -14,7 +15,6 @@ import {
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  // Solo declaramos las 3 piezas aquí
   imports: [
     CommonModule,
     FormsModule,
@@ -27,7 +27,11 @@ import {
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private auth: Auth,
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -36,9 +40,24 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  onLogin(): void {
+  async onLogin() {
     if (this.loginForm.valid) {
-      console.log('Formulario válido, listo para enviar a Firebase:', this.loginForm.value);
+
+      // Quitamos el foco del botón para evitar advertencias de accesibilidad
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+
+      const { email, password } = this.loginForm.value;
+
+      try {
+        await signInWithEmailAndPassword(this.auth, email, password);
+        console.log('¡Sesión iniciada con éxito!');
+        this.router.navigate(['/tabs/tab1']);
+      } catch (error) {
+        console.error('Error al iniciar sesión:', error);
+        alert('Credenciales incorrectas o el usuario no existe. Intente nuevamente.');
+      }
     }
   }
 }

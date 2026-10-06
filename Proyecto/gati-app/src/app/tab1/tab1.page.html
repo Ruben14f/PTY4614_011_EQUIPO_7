@@ -1,17 +1,17 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>Panel de Activos GATI</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <h1>Bienvenido al sistema</h1>
+  <p>Has ingresado exitosamente con tus credenciales corporativas.</p>
+
+  <!-- Botón para cerrar sesión -->
+  <ion-button color="danger" expand="block" (click)="onLogout()" class="ion-margin-top">
+    Cerrar Sesión
+  </ion-button>
+
 </ion-content>
