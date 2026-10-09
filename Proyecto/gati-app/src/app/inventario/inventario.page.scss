@@ -1,0 +1,71 @@
+.background-light {
+  --background: #f4f6f9;
+}
+
+.welcome-section {
+  padding: 10px 20px;
+  margin-bottom: 10px;
+
+  .main-title {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #173F5F;
+    margin-bottom: 5px;
+  }
+
+  .subtitle {
+    color: #666;
+    font-size: 1rem;
+    margin-top: 0;
+  }
+}
+
+.form-card {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 10px;
+
+  ion-card-title {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #333;
+    display: flex;
+    align-items: center;
+
+    .title-icon {
+      margin-right: 10px;
+      color: #20639B;
+      font-size: 1.5rem;
+    }
+  }
+}
+
+.custom-input {
+  --background: #f8f9fa;
+  --border-radius: 8px;
+  --padding-start: 15px;
+  margin-bottom: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.error-msg {
+  font-size: 0.8rem;
+  margin-left: 15px;
+  display: block;
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+
+.btn-container {
+  margin-top: 25px;
+
+  ion-button {
+    --box-shadow: 0 4px 10px rgba(32, 99, 155, 0.3);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+}

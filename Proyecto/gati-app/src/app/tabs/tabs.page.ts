@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// CORRECCIÓN: Importamos directamente desde '@ionic/angular'
+import { RouterModule } from '@angular/router'; // 1. IMPORTAMOS EL MOTOR DE RUTAS
+
 import {
   IonSplitPane, IonMenu, IonHeader, IonToolbar, IonTitle,
   IonContent, IonList, IonItem, IonIcon, IonLabel,
@@ -19,7 +20,9 @@ import {
   styleUrls: ['tabs.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, IonSplitPane, IonMenu, IonHeader, IonToolbar,
+    CommonModule,
+    RouterModule, // 2. LO AGREGAMOS A LA LISTA
+    IonSplitPane, IonMenu, IonHeader, IonToolbar,
     IonTitle, IonContent, IonList, IonItem, IonIcon, IonLabel,
     IonRouterOutlet, IonMenuToggle
   ],

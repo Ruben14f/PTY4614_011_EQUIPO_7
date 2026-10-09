@@ -1,0 +1,74 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Ingreso a Inventario</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding background-light">
+  <div class="welcome-section">
+    <h1 class="main-title">Registrar Hardware</h1>
+    <p class="subtitle">Añade nuevos equipos tecnológicos a la base de datos GATI.</p>
+  </div>
+
+  <ion-grid>
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" size-md="8" size-lg="6">
+
+        <ion-card class="form-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="hardware-chip-outline" class="title-icon"></ion-icon>
+              Detalles del Equipo
+            </ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <!-- Conectamos el HTML con el FormGroup del TypeScript -->
+            <form [formGroup]="equipoForm" (ngSubmit)="guardarEquipo()">
+
+              <ion-item class="custom-input">
+                <ion-select label="Tipo de Equipo *" labelPlacement="floating" formControlName="tipo">
+                  <ion-select-option value="Notebook">Notebook</ion-select-option>
+                  <ion-select-option value="PC Escritorio">PC Escritorio</ion-select-option>
+                  <ion-select-option value="Monitor">Monitor</ion-select-option>
+                  <ion-select-option value="Periférico">Periférico (Teclado/Mouse)</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('tipo')?.touched && equipoForm.get('tipo')?.invalid">El tipo es obligatorio.</ion-text>
+
+              <ion-item class="custom-input">
+                <ion-input label="Marca *" labelPlacement="floating" type="text" formControlName="marca" placeholder="Ej: Dell, HP, Lenovo"></ion-input>
+              </ion-item>
+              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('marca')?.touched && equipoForm.get('marca')?.invalid">La marca es obligatoria.</ion-text>
+
+              <ion-item class="custom-input">
+                <ion-input label="Modelo *" labelPlacement="floating" type="text" formControlName="modelo" placeholder="Ej: Latitude 3440"></ion-input>
+              </ion-item>
+              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('modelo')?.touched && equipoForm.get('modelo')?.invalid">El modelo es obligatorio.</ion-text>
+
+              <ion-item class="custom-input">
+                <ion-input label="Número de Serie *" labelPlacement="floating" type="text" formControlName="numeroSerie" placeholder="Ej: 5CD3241ABC"></ion-input>
+              </ion-item>
+              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('numeroSerie')?.touched && equipoForm.get('numeroSerie')?.invalid">El número de serie es obligatorio.</ion-text>
+
+              <ion-item class="custom-input">
+                <ion-input label="Orden de Compra (Asociada) *" labelPlacement="floating" type="text" formControlName="numeroOC" placeholder="Ej: OC-2026-0154"></ion-input>
+              </ion-item>
+              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('numeroOC')?.touched && equipoForm.get('numeroOC')?.invalid">La orden de compra es obligatoria.</ion-text>
+
+              <div class="btn-container">
+                <ion-button type="submit" expand="block" shape="round" color="primary" class="ion-margin-top" [disabled]="isSaving">
+                  <ion-icon slot="start" name="save-outline"></ion-icon>
+                  {{ isSaving ? 'Guardando...' : 'Registrar Equipo' }}
+                </ion-button>
+              </div>
+
+            </form>
+          </ion-card-content>
+        </ion-card>
+
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
