@@ -1,0 +1,74 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Recepción de Órdenes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding background-light">
+  <div class="welcome-section">
+    <h1 class="main-title">Recepción Inteligente</h1>
+    <p class="subtitle">Consulta la Orden de Compra para iniciar el escaneo físico.</p>
+  </div>
+
+  <!-- Buscador de OC -->
+  <ion-card class="search-card">
+    <ion-card-content>
+      <ion-item lines="none" class="search-item">
+        <ion-icon name="search-outline" slot="start" color="medium"></ion-icon>
+        <ion-input
+          placeholder="Ej: OC-12345"
+          [(ngModel)]="numeroOC"
+          (keyup.enter)="buscarOrden()">
+        </ion-input>
+        <ion-button slot="end" (click)="buscarOrden()" [disabled]="isLoading" color="primary">
+          {{ isLoading ? 'Buscando...' : 'Buscar' }}
+        </ion-button>
+      </ion-item>
+
+      <!-- Mensaje de Error -->
+      <ion-text color="danger" *ngIf="errorMessage">
+        <p class="error-msg"><ion-icon name="alert-circle-outline"></ion-icon> {{ errorMessage }}</p>
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Resultados: Se muestra solo si ordenData tiene información -->
+  <ion-card *ngIf="ordenData" class="result-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="document-text-outline" color="secondary"></ion-icon>
+        Detalles de la Orden
+      </ion-card-title>
+      <ion-card-subtitle>
+        Proveedor: <strong>{{ ordenData.proveedor }}</strong> | Fecha: {{ ordenData.fechaEmision }}
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-list>
+        <ion-list-header>
+          <ion-label>Artículos a Recepcionar</ion-label>
+        </ion-list-header>
+
+        <!-- Iteramos sobre los artículos del JSON -->
+        <ion-item *ngFor="let item of ordenData.articulos" class="article-item">
+          <ion-icon name="cube-outline" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <h2>{{ item.tipo }} {{ item.marca }} {{ item.modelo }}</h2>
+            <p>Progreso de escaneo:</p>
+          </ion-label>
+          <ion-badge slot="end" [color]="item.cantidadRecibida === item.cantidadTotal ? 'success' : 'warning'">
+            {{ item.cantidadRecibida }} / {{ item.cantidadTotal }}
+          </ion-badge>
+        </ion-item>
+      </ion-list>
+
+      <ion-button expand="block" color="success" class="ion-margin-top btn-scan">
+        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+        Iniciar Escaneo de Códigos
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
