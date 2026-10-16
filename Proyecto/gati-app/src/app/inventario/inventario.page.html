@@ -1,74 +1,156 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
-    <ion-title>Ingreso a Inventario</ion-title>
+    <ion-title>Gestión de Inventario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onLogout()" title="Cerrar Sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding background-light">
-  <div class="welcome-section">
-    <h1 class="main-title">Registrar Hardware</h1>
-    <p class="subtitle">Añade nuevos equipos tecnológicos a la base de datos GATI.</p>
-  </div>
 
-  <ion-grid>
-    <ion-row class="ion-justify-content-center">
-      <ion-col size="12" size-md="8" size-lg="6">
+  <!-- PANEL DE FILTROS -->
+  <ion-card class="filter-card">
+    <ion-card-content>
+      <ion-grid>
+        <ion-row class="ion-align-items-center">
 
-        <ion-card class="form-card">
-          <ion-card-header>
-            <ion-card-title>
-              <ion-icon name="hardware-chip-outline" class="title-icon"></ion-icon>
-              Detalles del Equipo
-            </ion-card-title>
-          </ion-card-header>
+          <ion-col size="12" size-md="4">
+            <ion-segment [(ngModel)]="filtroCategoria" (ionChange)="aplicarFiltros()" color="primary">
+              <ion-segment-button value="todos"><ion-label>Todos</ion-label></ion-segment-button>
+              <ion-segment-button value="hardware"><ion-label>Hardware</ion-label></ion-segment-button>
+              <ion-segment-button value="software"><ion-label>Licencias</ion-label></ion-segment-button>
+            </ion-segment>
+          </ion-col>
 
-          <ion-card-content>
-            <!-- Conectamos el HTML con el FormGroup del TypeScript -->
-            <form [formGroup]="equipoForm" (ngSubmit)="guardarEquipo()">
+          <ion-col size="12" size-md="4">
+            <ion-item lines="none" class="custom-input">
+              <ion-select label="Estado" labelPlacement="floating" [(ngModel)]="filtroEstado" (ionChange)="aplicarFiltros()">
+                <ion-select-option value="Todos">Todos los estados</ion-select-option>
+                <ion-select-option value="En Inventario">En Inventario</ion-select-option>
+                <ion-select-option value="Asignado">Asignados</ion-select-option>
+                <ion-select-option value="De Baja">De Baja</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-col>
 
-              <ion-item class="custom-input">
-                <ion-select label="Tipo de Equipo *" labelPlacement="floating" formControlName="tipo">
-                  <ion-select-option value="Notebook">Notebook</ion-select-option>
-                  <ion-select-option value="PC Escritorio">PC Escritorio</ion-select-option>
-                  <ion-select-option value="Monitor">Monitor</ion-select-option>
-                  <ion-select-option value="Periférico">Periférico (Teclado/Mouse)</ion-select-option>
-                </ion-select>
-              </ion-item>
-              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('tipo')?.touched && equipoForm.get('tipo')?.invalid">El tipo es obligatorio.</ion-text>
+          <ion-col size="12" size-md="4">
+            <ion-searchbar
+              placeholder="Buscar serie, modelo, empleado..."
+              [(ngModel)]="textoBusqueda"
+              (ionInput)="aplicarFiltros()"
+              animated="true">
+            </ion-searchbar>
+          </ion-col>
 
-              <ion-item class="custom-input">
-                <ion-input label="Marca *" labelPlacement="floating" type="text" formControlName="marca" placeholder="Ej: Dell, HP, Lenovo"></ion-input>
-              </ion-item>
-              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('marca')?.touched && equipoForm.get('marca')?.invalid">La marca es obligatoria.</ion-text>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
 
-              <ion-item class="custom-input">
-                <ion-input label="Modelo *" labelPlacement="floating" type="text" formControlName="modelo" placeholder="Ej: Latitude 3440"></ion-input>
-              </ion-item>
-              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('modelo')?.touched && equipoForm.get('modelo')?.invalid">El modelo es obligatorio.</ion-text>
+  <!-- TABLA DE INVENTARIO -->
+  <ion-card class="table-card">
+    <ion-card-content class="table-container">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>N° Serie / ID</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Asignado a</th>
+            <th>OC Origen</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of inventarioFiltrado">
+            <td>
+              <ion-icon [name]="item.categoria === 'Hardware' ? 'desktop-outline' : 'code-slash-outline'" color="medium"></ion-icon>
+              {{ item.categoria }}
+            </td>
+            <td><strong>{{ item.identificador }}</strong></td>
+            <td>{{ item.descripcion }}</td>
+            <td>
+              <ion-badge [color]="
+                item.estado === 'En Inventario' ? 'success' :
+                item.estado === 'Asignado' ? 'tertiary' : 'danger'">
+                {{ item.estado }}
+              </ion-badge>
+            </td>
+            <td>{{ item.asignadoA || '—' }}</td>
+            <td>{{ item.ocAsociada || item.itemCompraRef || '—' }}</td>
+            <td class="action-cell">
+              <ion-button fill="clear" color="medium" (click)="abrirOpciones(item)">
+                <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+              </ion-button>
+            </td>
+          </tr>
+          <tr *ngIf="inventarioFiltrado.length === 0">
+            <td colspan="7" class="ion-text-center ion-padding">No se encontraron activos con estos filtros.</td>
+          </tr>
+        </tbody>
+      </table>
+    </ion-card-content>
+  </ion-card>
 
-              <ion-item class="custom-input">
-                <ion-input label="Número de Serie *" labelPlacement="floating" type="text" formControlName="numeroSerie" placeholder="Ej: 5CD3241ABC"></ion-input>
-              </ion-item>
-              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('numeroSerie')?.touched && equipoForm.get('numeroSerie')?.invalid">El número de serie es obligatorio.</ion-text>
+  <!-- BOTÓN FLOTANTE PARA AÑADIR MANUALMENTE -->
+<!-- BOTÓN FLOTANTE EXTENDIDO -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary" (click)="setModalOpen(true)" class="fab-extendido">
+      <ion-icon name="add"></ion-icon>
+      <span class="fab-text">Ingreso Manual</span>
+    </ion-fab-button>
+  </ion-fab>
 
-              <ion-item class="custom-input">
-                <ion-input label="Orden de Compra (Asociada) *" labelPlacement="floating" type="text" formControlName="numeroOC" placeholder="Ej: OC-2026-0154"></ion-input>
-              </ion-item>
-              <ion-text color="danger" class="error-msg" *ngIf="equipoForm.get('numeroOC')?.touched && equipoForm.get('numeroOC')?.invalid">La orden de compra es obligatoria.</ion-text>
+  <!-- MODAL DE INGRESO MANUAL -->
+  <ion-modal [isOpen]="isModalOpen" (didDismiss)="setModalOpen(false)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Registrar Hardware Manual</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="setModalOpen(false)"><ion-icon name="close-outline"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <form [formGroup]="equipoForm" (ngSubmit)="guardarEquipo()">
+          <ion-item class="custom-input ion-margin-bottom">
+            <ion-select label="Tipo de Equipo *" labelPlacement="floating" formControlName="tipo">
+              <ion-select-option value="Notebook">Notebook</ion-select-option>
+              <ion-select-option value="PC Escritorio">PC Escritorio</ion-select-option>
+              <ion-select-option value="Monitor">Monitor</ion-select-option>
+              <ion-select-option value="Periférico">Periférico</ion-select-option>
+            </ion-select>
+          </ion-item>
 
-              <div class="btn-container">
-                <ion-button type="submit" expand="block" shape="round" color="primary" class="ion-margin-top" [disabled]="isSaving">
-                  <ion-icon slot="start" name="save-outline"></ion-icon>
-                  {{ isSaving ? 'Guardando...' : 'Registrar Equipo' }}
-                </ion-button>
-              </div>
+          <ion-item class="custom-input ion-margin-bottom">
+            <ion-input label="Marca *" labelPlacement="floating" type="text" formControlName="marca"></ion-input>
+          </ion-item>
 
-            </form>
-          </ion-card-content>
-        </ion-card>
+          <ion-item class="custom-input ion-margin-bottom">
+            <ion-input label="Modelo *" labelPlacement="floating" type="text" formControlName="modelo"></ion-input>
+          </ion-item>
 
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+          <ion-item class="custom-input ion-margin-bottom">
+            <ion-input label="Número de Serie *" labelPlacement="floating" type="text" formControlName="serie"></ion-input>
+          </ion-item>
+
+          <ion-item class="custom-input ion-margin-bottom">
+            <ion-input label="Orden de Compra *" labelPlacement="floating" type="text" formControlName="ocAsociada"></ion-input>
+          </ion-item>
+
+          <ion-button type="submit" expand="block" shape="round" color="primary" class="ion-margin-top" [disabled]="isSaving">
+            <ion-icon slot="start" name="save-outline"></ion-icon>
+            {{ isSaving ? 'Guardando...' : 'Registrar Equipo' }}
+          </ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>

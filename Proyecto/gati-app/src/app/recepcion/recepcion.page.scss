@@ -71,4 +71,25 @@
     letter-spacing: 0.5px;
     margin-top: 20px;
   }
+  .article-item {
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+
+  &.selected-item {
+    --background: #eaf4fb;
+    border-left: 4px solid #20639B;
+    border-radius: 4px;
+
+    h2 {
+      color: #20639B;
+    }
+  }
+}
+
+.scanner-box {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px dashed #20639B;
+}
 }

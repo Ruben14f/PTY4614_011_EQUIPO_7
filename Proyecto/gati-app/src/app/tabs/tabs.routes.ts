@@ -17,7 +17,9 @@ export const routes: Routes = [
       },
       {
         path: 'recepcion',
-        loadComponent: () => import('../recepcion/recepcion.page').then(m => m.RecepcionPage)
+        loadComponent: () => import('../recepcion/recepcion.page').then(m => m.RecepcionPage),
+        // Agregamos el guardián funcional en línea
+        canDeactivate: [(component: any) => component.confirmarSalida()]
       },
       {
         path: 'tab2',

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Auth, signOut } from '@angular/fire/auth';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AlertController } from '@ionic/angular';
 
 import {
   ToastController, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -74,14 +75,35 @@ export class Tab1Page {
     { serie: '9MN3456HJK', tipo: 'PC Escritorio HP', fechaCompra: '22-08-2017', anios: 8 }
   ];
 
-  constructor(private auth: Auth, private router: Router, private toastController: ToastController) {
+  constructor(private auth: Auth, private router: Router, private toastController: ToastController, private alertController: AlertController) {
     addIcons({ logOutOutline, desktopOutline, checkmarkCircleOutline, timeOutline, closeCircleOutline });
   }
 
-  async onLogout() {
-    await signOut(this.auth);
-    const toast = await this.toastController.create({ message: 'Sesión cerrada.', duration: 2500, position: 'top', color: 'success' });
-    await toast.present();
-    this.router.navigate(['/login']);
+async onLogout() {
+    const alert = await this.alertController.create({
+      header: 'Cerrar Sesión',
+      message: '¿Estás seguro de que deseas salir del sistema GATI?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Sí, salir',
+          handler: async () => {
+            await signOut(this.auth);
+            const toast = await this.toastController.create({
+              message: 'Sesión cerrada.',
+              duration: 2500,
+              position: 'top',
+              color: 'success'
+            });
+            await toast.present();
+            this.router.navigate(['/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 }
