@@ -1,0 +1,156 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+
+    <!-- AQUÍ FORZAMOS LA APARICIÓN DEL MENÚ LATERAL -->
+   <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+
+    <ion-title>Administración GATI</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="onLogout()" title="Cerrar Sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding background-light">
+
+  <div class="welcome-section">
+    <h1 class="main-title">Configuración del Sistema</h1>
+    <p class="subtitle">Gestión de personal de la organización y accesos al sistema.</p>
+  </div>
+
+  <!-- SELECTOR DE PESTAÑAS -->
+  <ion-segment [(ngModel)]="viewMode" color="primary" class="ion-margin-bottom">
+    <ion-segment-button value="funcionarios">
+      <ion-label><ion-icon name="people-outline"></ion-icon> Funcionarios MOP</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="usuarios">
+      <ion-label><ion-icon name="shield-checkmark-outline"></ion-icon> Usuarios Sistema</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- VISTA 1: FUNCIONARIOS -->
+  <div *ngIf="viewMode === 'funcionarios'">
+    <ion-card class="table-card">
+      <ion-card-content class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr><th>RUT</th><th>Nombre Completo</th><th>Área / Unidad</th><th>Cargo</th><th>Correo</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let f of listaFuncionarios">
+              <td><strong>{{ f.rut }}</strong></td>
+              <td>{{ f.nombreCompleto }}</td>
+              <td>{{ f.area }}</td>
+              <td>{{ f.cargo }}</td>
+              <td>{{ f.correo }}</td>
+            </tr>
+            <tr *ngIf="listaFuncionarios.length === 0">
+              <td colspan="5" class="ion-text-center">No hay funcionarios registrados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button color="primary" class="fab-extendido" (click)="setModalFuncionario(true)">
+        <ion-icon name="add"></ion-icon>
+        <span class="fab-text">Nuevo Funcionario</span>
+      </ion-fab-button>
+    </ion-fab>
+  </div>
+
+  <!-- VISTA 2: USUARIOS DEL SISTEMA -->
+  <div *ngIf="viewMode === 'usuarios'">
+    <ion-card class="table-card">
+      <ion-card-content class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr><th>Correo Electrónico</th><th>Rol de Acceso</th><th>Estado de Cuenta</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of listaUsuarios">
+              <td><strong>{{ u.correo }}</strong></td>
+              <td><ion-badge color="tertiary">{{ u.rol }}</ion-badge></td>
+              <td><ion-badge [color]="u.estado === 'Activo' ? 'success' : 'danger'">{{ u.estado }}</ion-badge></td>
+            </tr>
+            <tr *ngIf="listaUsuarios.length === 0">
+              <td colspan="3" class="ion-text-center">No hay usuarios del sistema registrados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button color="secondary" class="fab-extendido" (click)="setModalUsuario(true)">
+        <ion-icon name="add"></ion-icon>
+        <span class="fab-text">Nuevo Usuario</span>
+      </ion-fab-button>
+    </ion-fab>
+  </div>
+
+  <!-- MODAL: CREAR FUNCIONARIO -->
+  <ion-modal [isOpen]="isModalFuncionarioOpen" (didDismiss)="setModalFuncionario(false)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Registrar Funcionario</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="setModalFuncionario(false)"><ion-icon name="close-outline"></ion-icon></ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <form [formGroup]="funcionarioForm" (ngSubmit)="guardarFuncionario()">
+          <ion-item class="custom-input"><ion-input label="RUT *" labelPlacement="floating" formControlName="rut" placeholder="Ej: 12.345.678-9"></ion-input></ion-item>
+          <ion-item class="custom-input"><ion-input label="Nombre Completo *" labelPlacement="floating" formControlName="nombreCompleto"></ion-input></ion-item>
+          <ion-item class="custom-input"><ion-input label="Correo *" labelPlacement="floating" type="email" formControlName="correo"></ion-input></ion-item>
+
+          <ion-item class="custom-input">
+            <ion-select label="Área / Unidad *" labelPlacement="floating" formControlName="area">
+              <ion-select-option value="Dirección General">Dirección General</ion-select-option>
+              <ion-select-option value="Operaciones">Operaciones</ion-select-option>
+              <ion-select-option value="Finanzas">Finanzas</ion-select-option>
+              <ion-select-option value="Recursos Humanos">Recursos Humanos</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="custom-input"><ion-input label="Cargo *" labelPlacement="floating" formControlName="cargo"></ion-input></ion-item>
+
+          <ion-button type="submit" expand="block" shape="round" color="primary" class="ion-margin-top" [disabled]="isSaving">Guardar Funcionario</ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL: CREAR USUARIO SISTEMA -->
+  <ion-modal [isOpen]="isModalUsuarioOpen" (didDismiss)="setModalUsuario(false)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="secondary">
+          <ion-title>Crear Acceso a GATI</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="setModalUsuario(false)"><ion-icon name="close-outline"></ion-icon></ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <p class="ion-text-center ion-margin-bottom">Se enviará una invitación a este correo para que el técnico configure su contraseña segura.</p>
+        <form [formGroup]="usuarioForm" (ngSubmit)="guardarUsuario()">
+          <ion-item class="custom-input"><ion-input label="Correo Institucional *" labelPlacement="floating" type="email" formControlName="correo"></ion-input></ion-item>
+          <ion-item class="custom-input">
+            <ion-select label="Nivel de Acceso *" labelPlacement="floating" formControlName="rol">
+              <ion-select-option value="Administrador">Administrador</ion-select-option>
+              <ion-select-option value="Técnico">Técnico (Terreno)</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-button type="submit" expand="block" shape="round" color="secondary" class="ion-margin-top" [disabled]="isSaving">Enviar Invitación</ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>

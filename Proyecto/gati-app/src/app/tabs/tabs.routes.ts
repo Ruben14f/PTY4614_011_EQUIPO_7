@@ -22,6 +22,10 @@ export const routes: Routes = [
         canDeactivate: [(component: any) => component.confirmarSalida()]
       },
       {
+          path: 'administracion',
+          loadComponent: () => import('../administracion/administracion.page').then(m => m.AdministracionPage)
+        },
+      {
         path: 'tab2',
         loadComponent: () =>
           import('../tab2/tab2.page').then((m) => m.Tab2Page),

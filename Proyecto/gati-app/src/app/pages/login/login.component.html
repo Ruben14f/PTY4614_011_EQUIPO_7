@@ -1,18 +1,18 @@
 <ion-content scroll-y="false">
   <div class="split-layout">
 
-    <!-- LADO IZQUIERDO: Formulario -->
+    <!-- LADO IZQUIERDO: Formulario (Limitado y centrado) -->
     <div class="form-section">
       <div class="form-wrapper">
-        <!-- Reemplaza el src si le pusiste otro nombre a la imagen -->
         <img src="assets/LogoGatti.png" alt="Logo GATI" class="logo">
 
-        <h1 class="title">Iniciar Sesión</h1>
-        <p class="subtitle">Ingresa tus credenciales corporativas</p>
+        <h1 class="title">{{ isRegisterMode ? 'Crear Cuenta' : 'Iniciar Sesión' }}</h1>
+        <p class="subtitle">
+          {{ isRegisterMode ? 'Registra tu acceso como técnico autorizado' : 'Ingresa tus credenciales corporativas' }}
+        </p>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
-          <!-- Usamos fill="outline" para imitar las cajas de tu referencia -->
           <ion-input
             type="email"
             fill="outline"
@@ -31,17 +31,38 @@
             class="ion-margin-bottom custom-input">
           </ion-input>
 
-          <ion-button expand="block" type="submit" color="primary" class="login-btn" [disabled]="!loginForm.valid">
-            Ingresar
+          <!-- NUEVO ENLACE: OLVIDÉ MI CONTRASEÑA -->
+          <div class="ion-text-end" *ngIf="!isRegisterMode" style="margin-top: -10px; margin-bottom: 15px;">
+            <a (click)="recuperarContrasena()" style="color: #666; font-size: 0.85rem; cursor: pointer; text-decoration: underline;">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <ion-button expand="block" type="submit" color="primary" class="login-btn" [disabled]="!loginForm.valid || isLoading">
+            {{ isRegisterMode ? 'Registrarme en el Sistema' : 'Ingresar' }}
           </ion-button>
+
+          <div class="ion-text-center ion-margin-top toggle-container">
+            <a (click)="toggleMode()" class="toggle-link">
+              {{ isRegisterMode ? '¿Ya tienes cuenta? Inicia sesión aquí' : '¿Eres técnico nuevo? Regístrate aquí' }}
+            </a>
+          </div>
 
         </form>
       </div>
     </div>
 
-    <!-- LADO DERECHO: Imagen Decorativa -->
+<!-- LADO DERECHO: Imagen Decorativa y Marca de Agua del Logo GATI (Fija al 50%) -->
     <div class="image-section">
-      <!-- Aquí puedes poner un fondo azul o una imagen del MOP más adelante -->
+      <div class="brand-overlay">
+        <!-- Cargamos tu logo físico de GATI pero con una clase de difuminado gigante -->
+        <img src="assets/LogoGatti.png" alt="GATI Blur Logo" class="bg-logo-blur">
+
+        <div class="brand-text-wrapper">
+          <h1 class="brand-giant-title">GATI</h1>
+          <p class="brand-giant-subtitle">GESTIÓN DE ACTIVOS TI</p>
+        </div>
+      </div>
     </div>
 
   </div>

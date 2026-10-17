@@ -24,10 +24,10 @@
 
           <ion-item button routerLink="/tabs/recepcion" routerDirection="root" class="menu-item" menuClose>
             <ion-icon slot="start" name="document-text-outline"></ion-icon>
-            <ion-label>Órdenes de Compra</ion-label>
+            <ion-label>Recepción de Órdenes de Compra</ion-label>
           </ion-item>
 
-          <ion-item button class="menu-item">
+          <ion-item *ngIf="isAdmin" button routerLink="/tabs/administracion" routerDirection="root" class="menu-item" menuClose>
             <ion-icon slot="start" name="settings-outline"></ion-icon>
             <ion-label>Administración</ion-label>
           </ion-item>

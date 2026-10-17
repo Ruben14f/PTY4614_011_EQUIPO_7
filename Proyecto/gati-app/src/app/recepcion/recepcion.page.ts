@@ -29,8 +29,7 @@ import { BrowserMultiFormatReader } from '@zxing/browser';
   styleUrls: ['./recepcion.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
+    CommonModule, FormsModule,
     IonHeader, IonToolbar, IonButtons, IonMenuButton, IonTitle,
     IonContent, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonCardSubtitle,
     IonItem, IonIcon, IonInput, IonButton, IonText,
@@ -73,15 +72,21 @@ export class RecepcionPage {
     this.ordenData = null;
     this.modoEscaneo = false;
     this.articuloSeleccionado = null;
-    this.cdr.detectChanges();
+    this.cdr.detectChanges(); // Forzamos a mostrar el "Buscando..."
 
     try {
       const ocFormateada = this.numeroOC.trim().toUpperCase();
+
+      // Llamadas asíncronas
       const dataBruta = await this.apiService.consultarOC(ocFormateada);
+      const equiposDB = await this.databaseService.obtenerEquiposPorOC(ocFormateada);
 
-      this.equiposRecibidos = await this.databaseService.obtenerEquiposPorOC(ocFormateada);
+      this.equiposRecibidos = equiposDB;
 
-      dataBruta.articulos.forEach((articulo: any) => {
+      // Creamos una copia fresca del objeto para obligar al HTML a notar el cambio
+      const dataFresca = JSON.parse(JSON.stringify(dataBruta));
+
+      dataFresca.articulos.forEach((articulo: any) => {
         const cantidadReal = this.equiposRecibidos.filter((eq: any) =>
           eq.tipo === articulo.tipo && eq.marca === articulo.marca && eq.modelo === articulo.modelo
         ).length;
@@ -89,13 +94,18 @@ export class RecepcionPage {
         articulo.cantidadRecibida = cantidadReal;
       });
 
-      this.ordenData = dataBruta;
+      this.ordenData = dataFresca;
 
     } catch (error: any) {
       this.errorMessage = error.message;
     } finally {
       this.isLoading = false;
-      this.cdr.detectChanges();
+
+      // EL PARCHE INFALIBLE: Le damos 50ms a JavaScript para terminar sus procesos
+      // y obligamos a Angular a repintar la pantalla con los nuevos datos.
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 50);
     }
   }
 
@@ -123,7 +133,7 @@ export class RecepcionPage {
       this.procesarEscaneo();
 
     } catch (error) {
-      this.mostrarMensaje('No se detectó ningún código de barras o QR en la imagen.', 'warning');
+      this.mostrarMensaje('No se detectó ningún código de barras o QR.', 'warning');
     } finally {
       event.target.value = '';
     }
@@ -137,8 +147,9 @@ export class RecepcionPage {
     try {
       const existeGlobal = await this.databaseService.verificarSerieExiste(serie);
       if (existeGlobal) {
-        this.mostrarMensaje(`ALERTA: La serie ${serie} ya se encuentra registrada en el inventario general.`, 'danger');
+        this.mostrarMensaje(`ALERTA: La serie ${serie} ya se encuentra registrada.`, 'danger');
         this.codigoEscaneado = '';
+        this.cdr.detectChanges();
         return;
       }
     } catch (error) {
@@ -161,7 +172,7 @@ export class RecepcionPage {
 
       this.equiposRecibidos.push(nuevoEquipo);
       this.articuloSeleccionado.cantidadRecibida += 1;
-      this.mostrarMensaje(`Éxito: ${this.articuloSeleccionado.tipo} ${serie} registrado.`, 'success');
+      this.mostrarMensaje(`Éxito: ${this.articuloSeleccionado.tipo} registrado.`, 'success');
 
       if (this.articuloSeleccionado.cantidadRecibida >= this.articuloSeleccionado.cantidadTotal) {
         this.articuloSeleccionado = null;
@@ -172,7 +183,11 @@ export class RecepcionPage {
       this.mostrarMensaje('Error al guardar en la base de datos.', 'danger');
     } finally {
       this.codigoEscaneado = '';
-      this.cdr.detectChanges();
+
+      // Aplicamos el parche también aquí para que la tabla de progreso se actualice de inmediato
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 50);
     }
   }
 
@@ -188,7 +203,7 @@ export class RecepcionPage {
     return new Promise(async (resolve) => {
       const alert = await this.alertController.create({
         header: '¿Salir de la Recepción?',
-        message: 'Tienes una Orden de Compra en proceso. Si sales, la vista se limpiará. ¿Estás seguro?',
+        message: 'Tienes una Orden en proceso. Si sales, la vista se limpiará.',
         buttons: [
           { text: 'Quedarme', role: 'cancel', handler: () => resolve(false) },
           { text: 'Sí, salir', handler: () => resolve(true) }
@@ -211,7 +226,6 @@ export class RecepcionPage {
           text: 'Sí, salir',
           handler: async () => {
             await signOut(this.auth);
-            this.mostrarMensaje('Sesión cerrada.', 'success');
             this.router.navigate(['/login']);
           }
         }

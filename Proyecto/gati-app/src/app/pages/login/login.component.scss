@@ -1,81 +1,195 @@
+/* --- DISEÑO DE PANTALLA DIVIDIDA (40/60) --- */
 .split-layout {
   display: flex;
   height: 100vh;
-  width: 100%;
+  width: 100vw;
+  flex-direction: row;
+
+  @media (max-width: 992px) {
+    flex-direction: column;
+  }
 }
 
-/* --- LADO IZQUIERDO (40%) --- */
+/* --- SECCIÓN IZQUIERDA: FORMULARIO (40%) --- */
 .form-section {
-  flex: 0 0 40%; /* Toma exactamente el 40% de la pantalla */
-  width: 40%;
+  flex: 0 0 40%;
+  max-width: 40%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  padding: 40px;
+  box-sizing: border-box;
+
+  @media (max-width: 992px) {
+    flex: 1;
+    max-width: 100%;
+    padding: 20px;
+  }
+}
+
+/* El "wrapper" es el secreto: Evita que el formulario se estire infinitamente hacia los lados */
+.form-wrapper {
+  width: 100%;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  background-color: #ffffff;
-  padding: 2rem;
+}
 
-  .form-wrapper {
-    width: 100%;
-    max-width: 400px; 
+.logo {
+  max-width: 220px;
+  height: auto;
+  margin-bottom: 30px;
+  align-self: flex-start;
+
+  @media (max-width: 992px) {
+    align-self: center;
+    max-width: 180px;
   }
+}
 
-  .logo {
-    max-width: 200px;
-    display: block; /* Convertimos la imagen en bloque para poder centrarla */
-    margin: 0 auto 2rem auto; /* Centrado automático a los lados */
+.title {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #173f5f;
+  margin: 0 0 8px 0;
+
+  @media (max-width: 992px) {
+    font-size: 1.8rem;
+    text-align: center;
   }
+}
 
-  .title {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 700;
-    font-size: 2rem;
-    color: var(--ion-color-tertiary);
-    margin-bottom: 0.5rem;
-    /* Opcional: si quieres que el texto también se centre, descomenta la línea de abajo */
-    /* text-align: center; */
+.subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 30px 0;
+
+  @media (max-width: 992px) {
+    text-align: center;
+    margin-bottom: 20px;
   }
+}
 
-  .subtitle {
-    font-family: 'Open Sans', sans-serif;
+.custom-input {
+  --background: #ffffff;
+  --border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.login-btn {
+  margin-top: 24px;
+  height: 48px;
+  font-weight: 600;
+  font-size: 1rem;
+  --box-shadow: 0 4px 10px rgba(32, 99, 155, 0.2);
+}
+
+/* --- ENLACE DINÁMICO DE INTERCAMBIO --- */
+.toggle-container {
+  margin-top: 20px;
+
+  .toggle-link {
+    color: #20639b;
+    cursor: pointer;
     font-weight: 600;
-    color: #666666;
-    margin-bottom: 2.5rem;
-    /* text-align: center; */
-  }
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: color 0.2s ease;
 
-  .custom-input {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    --border-radius: 8px;
-  }
-
-  .login-btn {
-    margin-top: 1.5rem;
-    --border-radius: 8px;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    height: 50px;
+    &:hover {
+      color: #173f5f;
+      text-decoration: underline;
+    }
   }
 }
 
-/* --- LADO DERECHO (60%) --- */
+/* --- SECCIÓN DERECHA: IMAGEN / DECORACIÓN (60%) --- */
 .image-section {
-  flex: 0 0 60%; /* Toma el 60% restante */
-  width: 60%;
-  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
-  background-size: cover;
-  background-position: center;
+  flex: 0 0 60%;
+  max-width: 60%;
+  height: 100%;
+  background: linear-gradient(135deg, #0f2b46 0%, #1a5276 100%); /* Degradado corporativo profundo */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  /* Patrón de profundidad digital muy sutil */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 60%),
+                      linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    opacity: 0.8;
+  }
+
+  @media (max-width: 992px) {
+    display: none; /* Desaparece en móviles para enfocar el formulario */
+  }
 }
 
-/* Responsividad para Celulares */
-@media (max-width: 768px) {
-  .form-section {
-    flex: 0 0 100%; /* En celular vuelve a tomar toda la pantalla */
-    width: 100%;
+.brand-overlay {
+  text-align: center;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+
+  /* EL LOGO DIFUMINADO GRANDE */
+  .bg-logo-blur {
+    max-width: 320px; /* Tamaño generoso e imponente */
+    height: auto;
+    filter: blur(4px) brightness(0.95); /* Desenfoque fino y elegante */
+    opacity: 0.12; /* Traslúcido para que se funda armoniosamente con el azul */
+    animation: pulseSoft 8s ease-in-out infinite; /* Suave efecto latido para darle vida */
+    user-select: none;
+    pointer-events: none;
   }
-  .image-section {
-    display: none;
+
+  .brand-text-wrapper {
+    margin-top: 10px;
+
+    .brand-giant-title {
+      font-size: 4.8rem;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.15); /* Blanco de bajísima opacidad muy sofisticado */
+      letter-spacing: 14px; /* Mucho aire entre letras */
+      margin: 0;
+      line-height: 1;
+      text-transform: uppercase;
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    .brand-giant-subtitle {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.09); /* Extremadamente fino */
+      letter-spacing: 5px; /* Súper extendido */
+      margin: 10px 0 0 0;
+      text-transform: uppercase;
+    }
+  }
+}
+
+/* Suave animación que le da un aire vivo y cinemático al background */
+@keyframes pulseSoft {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.11;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.14;
   }
 }

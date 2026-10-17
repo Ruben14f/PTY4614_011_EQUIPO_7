@@ -2,7 +2,6 @@
   <ion-toolbar color="primary">
     <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
     <ion-title>Recepción de Órdenes</ion-title>
-    <!-- Botón de Cerrar Sesión unificado -->
     <ion-buttons slot="end">
       <ion-button (click)="onLogout()" title="Cerrar Sesión">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
@@ -52,28 +51,42 @@
       <ion-list>
         <ion-list-header><ion-label>Artículos a Recepcionar (Toca uno para escanear)</ion-label></ion-list-header>
 
-        <!-- Lista seleccionable -->
         <ion-item button *ngFor="let item of ordenData.articulos"
                   class="article-item"
                   [class.selected-item]="articuloSeleccionado === item"
                   (click)="seleccionarArticulo(item)">
-          <ion-icon name="cube-outline" slot="start" [color]="articuloSeleccionado === item ? 'tertiary' : 'primary'"></ion-icon>
+
+          <ion-icon
+            [name]="item.cantidadRecibida >= item.cantidadTotal ? 'checkmark-circle' : 'cube-outline'"
+            slot="start"
+            [color]="item.cantidadRecibida >= item.cantidadTotal ? 'success' : (articuloSeleccionado === item ? 'tertiary' : 'primary')">
+          </ion-icon>
+
           <ion-label>
-            <h2>{{ item.tipo }} {{ item.marca }} {{ item.modelo }}</h2>
-            <p>Progreso de escaneo:</p>
+            <!-- Título normal si no está completo -->
+            <h2 *ngIf="item.cantidadRecibida < item.cantidadTotal" style="font-weight: 600;">
+              {{ item.tipo }} {{ item.marca }} {{ item.modelo }}
+            </h2>
+            <!-- Título TACHADO y en gris si está completo -->
+            <h2 *ngIf="item.cantidadRecibida >= item.cantidadTotal" style="color: #999;">
+              <s>{{ item.tipo }} {{ item.marca }} {{ item.modelo }}</s>
+            </h2>
+
+            <p [style.color]="item.cantidadRecibida >= item.cantidadTotal ? '#28ba62' : ''">
+              {{ item.cantidadRecibida >= item.cantidadTotal ? 'Recepción completa' : 'Progreso de escaneo:' }}
+            </p>
           </ion-label>
+
           <ion-badge slot="end" [color]="item.cantidadRecibida >= item.cantidadTotal ? 'success' : 'warning'">
             {{ item.cantidadRecibida }} / {{ item.cantidadTotal }}
           </ion-badge>
         </ion-item>
       </ion-list>
 
-      <!-- Mensaje si no hay nada seleccionado -->
       <ion-text color="medium" class="ion-text-center ion-padding" *ngIf="!articuloSeleccionado">
         <p><small>👆 Toca un artículo de la lista de arriba para activar el escáner.</small></p>
       </ion-text>
 
-      <!-- Escáner Activo -->
       <div *ngIf="modoEscaneo && articuloSeleccionado" class="ion-margin-top scanner-box">
         <ion-text color="tertiary">
           <h3 style="margin: 0 0 10px 0; font-weight: 600; font-size: 1rem;">
@@ -91,7 +104,6 @@
           <ion-button slot="end" (click)="procesarEscaneo()" color="primary">Leer</ion-button>
         </ion-item>
 
-        <!-- NUEVO: Botón para subir imagen con QR/Barcode -->
         <div class="ion-text-center ion-margin-top">
           <input type="file" #fileInput (change)="leerImagen($event)" accept="image/*" style="display: none;">
           <ion-button fill="outline" color="secondary" (click)="fileInput.click()">
