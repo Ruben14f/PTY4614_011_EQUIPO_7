@@ -1,0 +1,124 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Casos de Uso GATI" id="0">
+    <mxGraphModel dx="990" dy="535" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1120" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="boundary" parent="1" style="rounded=1;arcSize=2;html=1;strokeWidth=2;strokeColor=#666666;fillColor=#f5f5f5;gradientColor=#E1E1E1;" value="" vertex="1">
+          <mxGeometry height="700" width="1110" x="313.5" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-12" edge="1" parent="1" source="admin" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#6C8EBF;strokeWidth=3;align=center;verticalAlign=bottom;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=none;endArrow=none;endFill=0;endSize=12;fillColor=#cce5ff;" target="auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" parent="1" style="rounded=1;html=1;whiteSpace=wrap;strokeWidth=3;strokeColor=#6c8ebf;fillColor=#dae8fc;fontSize=16;fontStyle=1;gradientColor=#7ea6e0;" value="" vertex="1">
+          <mxGeometry height="135" width="205" x="52.5" y="374.5" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-13" edge="1" parent="1" source="tech" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;strokeWidth=3;align=center;verticalAlign=bottom;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=none;endArrow=none;endFill=0;endSize=12;fillColor=#d5e8d4;gradientColor=#97d077;" target="auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tech" parent="1" style="rounded=1;html=1;whiteSpace=wrap;strokeWidth=3;strokeColor=#82b366;fillColor=#d5e8d4;fontSize=16;fontStyle=1;gradientColor=#97d077;" value="" vertex="1">
+          <mxGeometry height="132.5" width="205" x="1463.5" y="374.5" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-29" edge="1" parent="1" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeColor=#b85450;strokeWidth=3;align=center;verticalAlign=bottom;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=none;endArrow=none;endFill=0;endSize=12;fillColor=#f8cecc;gradientColor=#ea6b66;" target="oc">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="257.5" y="687.5" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="auth" parent="1" style="ellipse;html=1;whiteSpace=wrap;strokeWidth=3.8;fontSize=15;fontStyle=1;strokeColor=#6c8ebf;fillColor=#dae8fc;gradientColor=#7ea6e0;" value="&lt;div&gt;&lt;font style=&quot;font-size: 25px;&quot;&gt;Autenticarse&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 25px;&quot;&gt;en el sistema&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="149" width="330" x="685" y="366.25" as="geometry" />
+        </mxCell>
+        <mxCell id="assign" parent="1" style="ellipse;html=1;whiteSpace=wrap;strokeWidth=3.8;fontSize=15;fontStyle=1;strokeColor=#d6b656;fillColor=#fff2cc;align=center;verticalAlign=middle;fontFamily=Helvetica;gradientColor=#ffd966;" value="&lt;div&gt;Aplicar permisos&lt;/div&gt;&lt;div&gt;y habilitar funcionalidades&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="245" x="845" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="act" parent="1" style="ellipse;html=1;whiteSpace=wrap;strokeWidth=3.8;fontSize=15;fontStyle=1;strokeColor=#996185;fillColor=#e6d0de;align=center;verticalAlign=middle;fontFamily=Helvetica;gradientColor=#d5739d;" value="&lt;div&gt;Recuperar&lt;/div&gt;&lt;div&gt;Contraseña&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="245" x="1120" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="inventory" parent="1" style="ellipse;html=1;whiteSpace=wrap;strokeWidth=3.8;fontSize=15;fontStyle=1;strokeColor=#d6b656;fillColor=#fff2cc;align=center;verticalAlign=middle;fontFamily=Helvetica;gradientColor=#ffd966;" value="&lt;div&gt;Obtener perfil&lt;/div&gt;&lt;div&gt;y rol de usuario&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="245" x="630" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="oc" parent="1" style="ellipse;html=1;whiteSpace=wrap;strokeWidth=3.8;fontSize=15;fontStyle=1;strokeColor=#b85450;fillColor=#f8cecc;align=center;verticalAlign=middle;fontFamily=Helvetica;gradientColor=#ea6b66;" value="&lt;div&gt;Validar credenciales&lt;/div&gt;&lt;div&gt;en Firebase&lt;/div&gt;&lt;div&gt;Authentication&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="245" x="360" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="Vt19OvF6LVM7k0zxgNp5-1" parent="1" style="text;whiteSpace=wrap;html=1;align=center;fontSize=15;fillColor=#dae8fc;gradientColor=#7ea6e0;strokeColor=#6c8ebf;" value="&lt;b&gt;Administrador&lt;/b&gt;&lt;br&gt;(Usuario web)" vertex="1">
+          <mxGeometry height="50" width="110" x="97.5" y="447" as="geometry" />
+        </mxCell>
+        <mxCell id="Vt19OvF6LVM7k0zxgNp5-2" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;align=center;fillColor=#d5e8d4;gradientColor=#97d077;strokeColor=#82b366;" value="&lt;b&gt;Técnico de Soporte&lt;/b&gt;&lt;br&gt;(Usuario móvil)" vertex="1">
+          <mxGeometry height="50" width="150" x="1491" y="444" as="geometry" />
+        </mxCell>
+        <mxCell id="Vt19OvF6LVM7k0zxgNp5-3" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;strokeWidth=4;gradientColor=#7ea6e0;" value="" vertex="1">
+          <mxGeometry height="60" width="38.75" x="133.13" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="gaQGtBsvk6xe881UB-P3-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;strokeColor=#82b366;fillColor=#d5e8d4;strokeWidth=4;align=center;fontFamily=Helvetica;fontSize=12;gradientColor=#97d077;" value="" vertex="1">
+          <mxGeometry height="60" width="38.75" x="1546.6299999999999" y="384" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=22;fontStyle=1;fontColor=#17365D;rounded=1;roundedPerimeter=1;strokeColor=light-dark(#0080ff, #5c79a3);strokeWidth=3;fillColor=#000066;" value="&lt;blockquote&gt;&lt;div&gt;&lt;span style=&quot;color: rgb(247, 238, 252);&quot;&gt;VISTA DE ESCENARIOS&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;color: rgb(255, 255, 255); font-weight: normal;&quot;&gt;(modelo 4+1)&lt;/span&gt;&lt;span style=&quot;color: rgb(247, 238, 252);&quot;&gt;:&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;color: rgb(255, 255, 255);&quot;&gt;DIAGRAMA DE CASO DE USO&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;p&gt;&lt;span style=&quot;color: rgb(255, 255, 255); font-weight: normal;&quot;&gt;&lt;b&gt;Representación&lt;/b&gt;:&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;color: rgb(255, 255, 255);&quot;&gt;Autenticarse al sistema&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;color: rgb(255, 255, 255); font-weight: normal;&quot;&gt;&lt;b&gt;Tipo&lt;/b&gt;:&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;color: rgb(255, 255, 255); font-weight: normal;&quot;&gt;UML — comportamiento&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;&lt;/blockquote&gt;" vertex="1">
+          <mxGeometry height="140" width="650" x="30" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-30" edge="1" parent="1" source="auth" style="endArrow=open;endSize=12;endFill=0;html=1;rounded=0;strokeColor=#996185;strokeWidth=3;align=center;verticalAlign=bottom;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=none;fillColor=#e6d0de;dashed=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=open;startFill=0;startSize=12;gradientColor=#d5739d;" target="act" value="">
+          <mxGeometry relative="1" width="160" x="0.1124" y="-21" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="780" y="550" as="sourcePoint" />
+            <mxPoint x="940" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-31" edge="1" parent="1" source="auth" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;strokeColor=#6C8EBF;strokeWidth=3;align=center;verticalAlign=bottom;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=none;fillColor=#cce5ff;exitX=0.094;exitY=0.801;exitDx=0;exitDy=0;entryX=0.984;entryY=0.424;entryDx=0;entryDy=0;dashed=1;exitPerimeter=0;entryPerimeter=0;" target="oc" value="">
+          <mxGeometry relative="1" width="160" as="geometry">
+            <mxPoint x="710" y="610" as="sourcePoint" />
+            <mxPoint x="870" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-32" connectable="0" parent="PGKvegoI3Qi9ggqv8-qj-31" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontFamily=Helvetica;fontSize=13;fontColor=default;labelBackgroundColor=none;rotation=-45;fontStyle=1" value="«include»" vertex="1">
+          <mxGeometry relative="1" x="-0.0007" y="-1" as="geometry">
+            <mxPoint x="-9" y="-6" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-36" connectable="0" parent="PGKvegoI3Qi9ggqv8-qj-31" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontFamily=Helvetica;fontSize=13;fontColor=default;labelBackgroundColor=none;rotation=-75;fontStyle=1" value="«include»" vertex="1">
+          <mxGeometry relative="1" x="-0.0007" y="-1" as="geometry">
+            <mxPoint x="94" y="92" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-37" connectable="0" parent="PGKvegoI3Qi9ggqv8-qj-31" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontFamily=Helvetica;fontSize=13;fontColor=default;labelBackgroundColor=none;rotation=65;fontStyle=1" value="«include»" vertex="1">
+          <mxGeometry relative="1" x="-0.0007" y="-1" as="geometry">
+            <mxPoint x="292" y="22" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-33" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;rotation=35;fontColor=#996185;fontStyle=1;fontSize=13;" value="«extend»" vertex="1">
+          <mxGeometry height="30" width="60" x="1030" y="515.25" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-34" edge="1" parent="1" source="auth" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.331;exitY=0.967;exitDx=0;exitDy=0;entryX=0.462;entryY=0.015;entryDx=0;entryDy=0;entryPerimeter=0;dashed=1;strokeColor=#6C8EBF;strokeWidth=3;align=center;verticalAlign=bottom;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=none;endArrow=open;endFill=1;endSize=12;fillColor=#cce5ff;exitPerimeter=0;" target="inventory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-35" edge="1" parent="1" source="auth" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.693;exitY=0.981;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;strokeColor=#6C8EBF;strokeWidth=3;align=center;verticalAlign=bottom;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=none;endArrow=open;endFill=1;endSize=12;fillColor=#cce5ff;exitPerimeter=0;" target="assign">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-44" edge="1" parent="1" source="PGKvegoI3Qi9ggqv8-qj-39" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=3;align=center;verticalAlign=bottom;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=none;endArrow=none;endFill=0;endSize=12;fillColor=#fff2cc;gradientColor=#ffd966;" target="assign">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-45" edge="1" parent="1" source="PGKvegoI3Qi9ggqv8-qj-39" style="edgeStyle=none;shape=connector;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#d6b656;strokeWidth=3;align=center;verticalAlign=bottom;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=none;endArrow=none;endFill=0;endSize=12;fillColor=#fff2cc;gradientColor=#ffd966;" target="inventory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-39" parent="1" style="rounded=1;html=1;whiteSpace=wrap;strokeWidth=3;strokeColor=#d6b656;fillColor=#fff2cc;fontSize=16;fontStyle=1;gradientColor=#ffd966;" value="" vertex="1">
+          <mxGeometry height="132.5" width="205" x="1470" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-40" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;align=center;fillColor=#fff2cc;gradientColor=#ffd966;strokeColor=#d6b656;" value="&lt;div&gt;&lt;b&gt;«datastore»&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Cloud Firestore&lt;/b&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="1497.5" y="739.5" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-41" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;strokeColor=#d6b656;fillColor=#fff2cc;strokeWidth=4;align=center;fontFamily=Helvetica;fontSize=12;gradientColor=#ffd966;" value="" vertex="1">
+          <mxGeometry height="60" width="38.75" x="1553.1299999999999" y="679.5" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-42" parent="1" style="rounded=1;html=1;whiteSpace=wrap;strokeWidth=3;strokeColor=#b85450;fillColor=#f8cecc;fontSize=16;fontStyle=1;gradientColor=#ea6b66;" value="" vertex="1">
+          <mxGeometry height="135" width="205" x="52.5" y="612.5" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-43" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;strokeColor=#b85450;fillColor=#f8cecc;strokeWidth=4;gradientColor=#ea6b66;" value="" vertex="1">
+          <mxGeometry height="60" width="38.75" x="133.13" y="618" as="geometry" />
+        </mxCell>
+        <mxCell id="Vt19OvF6LVM7k0zxgNp5-17" parent="1" style="text;whiteSpace=wrap;html=1;align=center;fillColor=#f8cecc;gradientColor=#ea6b66;strokeColor=#b85450;" value="&lt;b&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;«servicio Firebase Authentication»&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="80" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="PGKvegoI3Qi9ggqv8-qj-46" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=#36393d;fillColor=#cce5ff;align=left;verticalAlign=middle;rounded=0;fontSize=15;" value="&lt;div&gt;&lt;b&gt;Descripción general&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/div&gt;Este diagrama representa el caso de uso &quot;Autenticarse en el sistema&quot;. Los usuarios (Administrador y Tecnico de Soporte) acceden a GATI proporcionando&lt;br&gt;sus credenciales. El sistema valida la identidad del usuario mediante Firebase Authentication, obtiene su perfil y rol desde Cloud Firestore, y aplica los permisos&lt;br&gt;correspondientes para habilitar las funcionalidades autorizadas.&lt;br&gt;El caso de uso &quot;Recuperar contraseña&quot; extiende el proceso de autenticación y se ejecuta de forma opcional cuando el usuario lo solicita." vertex="1">
+          <mxGeometry height="120" width="1110" x="160" y="960" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
