@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-// AÑADIDOS: doc, updateDoc
-import { Firestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, updateDoc } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, updateDoc, orderBy } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DatabaseService {
   private firestore: Firestore = inject(Firestore);
+  private auth: Auth = inject(Auth);
 
   constructor() { }
 
@@ -70,7 +71,6 @@ export class DatabaseService {
     }
   }
 
-  // --- SECCIÓN FUNCIONARIOS ---
   async obtenerFuncionarios() {
     try {
       const funcionariosRef = collection(this.firestore, 'funcionarios');
@@ -92,7 +92,6 @@ export class DatabaseService {
     }
   }
 
-  // --- SECCIÓN USUARIOS DEL SISTEMA ---
   async obtenerUsuariosSistema() {
     try {
       const usuariosRef = collection(this.firestore, 'usuarios_sistema');
@@ -119,11 +118,7 @@ export class DatabaseService {
       const usuariosRef = collection(this.firestore, 'usuarios_sistema');
       const q = query(usuariosRef, where('correo', '==', correo));
       const snapshot = await getDocs(q);
-
-      if (snapshot.empty) {
-        return false;
-      }
-
+      if (snapshot.empty) return false;
       const datosUsuario = snapshot.docs[0].data();
       return datosUsuario['estado'] === 'Activo';
     } catch (error) {
@@ -143,56 +138,134 @@ export class DatabaseService {
     }
   }
 
-  // --- FUNCIÓN UNIVERSAL PARA ASIGNAR ---
-  async asignarActivo(coleccion: string, idActivo: string, destino: any): Promise<void> {
-    try {
-      const activoRef = doc(this.firestore, `${coleccion}/${idActivo}`);
-      await updateDoc(activoRef, {
-        estado: 'Asignado', // Ajustado para que las insignias de color funcionen
-        asignadoA_rut: destino.rut,
-        asignadoA_nombre: destino.nombre,
-        asignadoA_area: destino.area,
-        fechaAsignacion: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error(`Error al asignar en la colección ${coleccion}:`, error);
-      throw error;
-    }
+  async asignarActivo(coleccion: string, idActivo: string, destino: any, actaUrl: string = ''): Promise<void> {
+    const activoRef = doc(this.firestore, `${coleccion}/${idActivo}`);
+    const fechaActual = new Date().toISOString();
+
+    await updateDoc(activoRef, {
+      estado: 'Asignado',
+      asignadoA_rut: destino.rut || '',
+      asignadoA_nombre: destino.nombre,
+      asignadoA_area: destino.area,
+      fechaAsignacion: fechaActual,
+      actaUrl: actaUrl
+    });
+
+    const historialRef = collection(this.firestore, `${coleccion}/${idActivo}/historial`);
+    await addDoc(historialRef, {
+      tipoAccion: 'Asignación',
+      funcionario: destino.nombre,
+      area: destino.area,
+      fecha: fechaActual,
+      actaUrl: actaUrl
+    });
   }
 
-  // --- FUNCIÓN PARA DESVINCULAR (Devolver a Bodega) ---
-  async desvincularActivo(coleccion: string, idActivo: string): Promise<void> {
-    try {
-      const activoRef = doc(this.firestore, `${coleccion}/${idActivo}`);
-      await updateDoc(activoRef, {
-        estado: 'En Inventario',
-        asignadoA_rut: '',
-        asignadoA_nombre: '',
-        asignadoA_area: '',
-        fechaAsignacion: ''
-      });
-    } catch (error) {
-      console.error(`Error al desvincular en ${coleccion}:`, error);
-      throw error;
-    }
+  async desvincularActivo(
+    coleccion: string,
+    idActivo: string,
+    nombreDevuelve: string = 'N/A',
+    areaDevuelve: string = 'Inventario',
+    actaUrl: string = ''
+  ): Promise<void> {
+    const activoRef = doc(this.firestore, `${coleccion}/${idActivo}`);
+    const fechaActual = new Date().toISOString();
+
+    await updateDoc(activoRef, {
+      estado: 'En Inventario',
+      asignadoA_rut: '',
+      asignadoA_nombre: '',
+      asignadoA_area: '',
+      fechaAsignacion: '',
+      actaUrl: ''
+    });
+
+    const historialRef = collection(this.firestore, `${coleccion}/${idActivo}/historial`);
+    await addDoc(historialRef, {
+      tipoAccion: 'Devolución a Bodega',
+      funcionario: nombreDevuelve || 'N/A',
+      area: areaDevuelve || 'Inventario',
+      fecha: fechaActual,
+      actaUrl: actaUrl
+    });
   }
 
-  // --- FUNCIÓN PARA DAR DE BAJA (Sacar de circulación) ---
   async darDeBajaActivo(coleccion: string, idActivo: string, motivo: string): Promise<void> {
+    const activoRef = doc(this.firestore, `${coleccion}/${idActivo}`);
+    const fechaActual = new Date().toISOString();
+
+    await updateDoc(activoRef, {
+      estado: 'De Baja',
+      motivoBaja: motivo,
+      fechaBaja: fechaActual,
+      asignadoA_rut: '',
+      asignadoA_nombre: '',
+      asignadoA_area: ''
+    });
+
+    const historialRef = collection(this.firestore, `${coleccion}/${idActivo}/historial`);
+    await addDoc(historialRef, {
+      tipoAccion: `Baja: ${motivo}`,
+      funcionario: 'N/A',
+      area: 'Fuera de circulación',
+      fecha: fechaActual
+    });
+  }
+
+  async obtenerHistorialActivo(coleccion: string, idActivo: string): Promise<any[]> {
     try {
-      const activoRef = doc(this.firestore, `${coleccion}/${idActivo}`);
-      await updateDoc(activoRef, {
-        estado: 'De Baja',
-        motivoBaja: motivo,
-        fechaBaja: new Date().toISOString(),
-        // Limpiamos a la persona porque el equipo ya no existe operativamente
-        asignadoA_rut: '',
-        asignadoA_nombre: '',
-        asignadoA_area: ''
-      });
+      const historialRef = collection(this.firestore, `${coleccion}/${idActivo}/historial`);
+      const q = query(historialRef, orderBy('fecha', 'desc'));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => doc.data());
     } catch (error) {
-      console.error(`Error al dar de baja en ${coleccion}:`, error);
-      throw error;
+      console.error('Error al obtener historial:', error);
+      return [];
     }
+  }
+
+  // SUBIDA DIRECTA POR HTTPS A FIREBASE STORAGE (Inmune al error ref._location)
+  async subirActaPDF(base64Data: string, nombreArchivo: string): Promise<string> {
+    console.log('1. Empaquetando PDF binario para subida directa...');
+    const base64Limpio = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+    const byteCharacters = atob(base64Limpio);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+
+    const bucket = 'gati-mop.firebasestorage.app';
+    const rutaCodificada = encodeURIComponent(`actas/${nombreArchivo}`);
+    const urlSubida = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o?uploadType=media&name=${rutaCodificada}`;
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/pdf'
+    };
+
+    if (this.auth.currentUser) {
+      const token = await this.auth.currentUser.getIdToken();
+      headers['Authorization'] = `Firebase ${token}`;
+    }
+
+    console.log('2. Subiendo documento a Firebase Storage...');
+    const response = await fetch(urlSubida, {
+      method: 'POST',
+      headers,
+      body: pdfBlob
+    });
+
+    if (!response.ok) {
+      const errorTexto = await response.text();
+      throw new Error(`Fallo en Storage (${response.status}): ${errorTexto}`);
+    }
+
+    const data = await response.json();
+    const tokenDescarga = data.downloadTokens ? data.downloadTokens.split(',')[0] : '';
+    const urlFinal = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${rutaCodificada}?alt=media&token=${tokenDescarga}`;
+
+    console.log('3. ¡Archivo subido! URL Lista:', urlFinal);
+    return urlFinal;
   }
 }

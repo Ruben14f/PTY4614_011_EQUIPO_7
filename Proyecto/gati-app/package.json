@@ -31,7 +31,9 @@
     "chart.js": "^4.5.1",
     "firebase": "^12.19.0",
     "ionicons": "^8.1.0",
+    "jspdf": "^4.2.1",
     "ng2-charts": "^11.0.0",
+    "pdfmake": "^0.3.13",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -42,6 +44,7 @@
     "@angular/language-service": "22.1.7",
     "@capacitor/cli": "8.5.2",
     "@ionic/angular-toolkit": "^13.0.0",
+    "@types/pdfmake": "^0.3.3",
     "angular-eslint": "22.0.0",
     "eslint": "^10.10.0",
     "jsdom": "^26.0.0",
