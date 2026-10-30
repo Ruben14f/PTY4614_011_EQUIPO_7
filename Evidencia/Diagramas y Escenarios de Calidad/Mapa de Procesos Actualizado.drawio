@@ -1,0 +1,175 @@
+<mxfile host="app.diagrams.net" agent="ChatGPT">
+  <diagram id="gati-process-map" name="Mapa de Procesos GATI">
+    <mxGraphModel dx="2060" dy="1174" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=26;fontStyle=1;fontColor=#17365D;" value="Mapa de Procesos del Área de Sistemas de Información y Soporte Informático" vertex="1">
+          <mxGeometry height="40" width="1100" x="290" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=24;fontColor=#365F91;" value="y relación del sistema GATI con la cadena de trazabilidad de activos y licencias" vertex="1">
+          <mxGeometry height="30" width="940" x="370" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="strategic_bg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E4D5F2;strokeColor=#9673A6;" vertex="1">
+          <mxGeometry height="155" width="1460" x="60" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="support_bg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDF1D8;strokeColor=#82B366;" vertex="1">
+          <mxGeometry height="165" width="1460" x="60" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="strategic_label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5B2C90;strokeColor=#5B2C90;fontColor=#FFFFFF;fontSize=20;align=left;spacingLeft=16;verticalAlign=middle;" value="" vertex="1">
+          <mxGeometry height="155" width="245" x="60" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="oper_label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0B5B91;strokeColor=#0B5B91;fontColor=#FFFFFF;fontSize=20;align=left;spacingLeft=16;verticalAlign=middle;" value="" vertex="1">
+          <mxGeometry height="225" width="245" x="60" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="support_label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E8B3C;strokeColor=#2E8B3C;fontColor=#FFFFFF;fontSize=20;align=left;spacingLeft=16;verticalAlign=middle;" value="" vertex="1">
+          <mxGeometry height="165" width="245" x="60" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="plan" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8F3FC;strokeColor=#9673A6;fontSize=15;" value="" vertex="1">
+          <mxGeometry height="115" width="300" x="375" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="resources" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8F3FC;strokeColor=#9673A6;fontSize=15;" value="" vertex="1">
+          <mxGeometry height="115" width="300" x="785" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="control" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8F3FC;strokeColor=#9673A6;fontSize=15;" value="" vertex="1">
+          <mxGeometry height="115" width="300" x="1195" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="docs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FFF5;strokeColor=#82B366;fontSize=15;" value="&lt;font style=&quot;font-size:12px&quot;&gt;.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="310" x="370" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="supply" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FFF5;strokeColor=#82B366;fontSize=15;" value="" vertex="1">
+          <mxGeometry height="110" width="310" x="750" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="admin" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FFF5;strokeColor=#82B366;fontSize=15;" value="" vertex="1">
+          <mxGeometry height="110" width="310" x="1160" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-2" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=16;fontColor=#FFFFFF;" value="&lt;font style=&quot;line-height: 60%;&quot;&gt;Definen la dirección,&lt;br&gt;planificación y control&lt;br&gt;del área.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="220" x="92.5" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-3" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=25;fontColor=#FFFFFF;align=center;" value="&lt;b&gt;Procesos&lt;br&gt;estratégicos&lt;/b&gt;" vertex="1">
+          <mxGeometry height="75" width="180" x="92.5" y="125" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-4" parent="1" style="text;whiteSpace=wrap;html=1;fontColor=#FFFFFF;" value="&lt;br&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;Ejecución de los servicios&lt;br&gt;y gestión de la operación&lt;br&gt;diaria del área.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="210" x="90" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-5" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=16;fontColor=#FFFFFF;align=center;" value="&lt;b&gt;&lt;font style=&quot;font-size: 25px;&quot;&gt;Procesos&lt;br&gt;operativos&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="65" width="130" x="117.5" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-6" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=16;fontColor=#FFFFFF;" value="&lt;font&gt;Entregan recursos,&lt;br&gt;información y soporte&lt;br&gt;necesario para la operación.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="210" x="85" y="615" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-7" parent="1" style="text;whiteSpace=wrap;html=1;fontColor=#FFFFFF;" value="&lt;b&gt;&lt;font style=&quot;font-size: 25px;&quot;&gt;Procesos&lt;br&gt;de apoyo&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="65" width="162.5" x="113.75" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-8" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;" value="&lt;div&gt;&lt;font&gt;Definición de lineamientos,&lt;/font&gt;&lt;/div&gt;&lt;font&gt;prioridades y planificación&lt;br&gt;de iniciativas.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="210" x="480" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-9" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;" value="&lt;div&gt;&lt;font&gt;Administración de recursos&lt;/font&gt;&lt;/div&gt;&lt;font&gt;humanos, presupuestarios&lt;br&gt;y tecnológicos.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="200" x="890" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-10" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Planificación TI&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="160" x="480" y="142.5" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-11" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Gestión de recursos&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="200" x="890" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-12" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;" value="&lt;br&gt;&lt;font&gt;Seguimiento de indicadores,&lt;br&gt;cumplimiento y control de la operación.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="210" x="1290" y="159" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-13" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Control TI&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="90" x="1300" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-14" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#232F3E;fillColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.users;" value="" vertex="1">
+          <mxGeometry height="100" width="100" x="790" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-15" parent="1" style="sketch=0;outlineConnect=0;gradientColor=none;fontColor=#545B64;strokeColor=none;fillColor=#000000;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.illustration_desktop;pointerEvents=1;strokeWidth=5;" value="" vertex="1">
+          <mxGeometry height="65" width="71.43" x="1206.78" y="166" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-16" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#232F3E;fillColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.checklist;" value="" vertex="1">
+          <mxGeometry height="105" width="105" x="375" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-17" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;shapeInside=1;fixedSize=1;fillColor=#1F6FAF;strokeColor=#1F6FAF;size=66;" value="" vertex="1">
+          <mxGeometry height="185" width="396" x="314" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="incidents" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000099;fontSize=15;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="115" width="260" x="392.5" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-18" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=13;" value="&lt;br&gt;&lt;font&gt;Recepción, registro y seguimiento de&lt;br&gt;incidentes y solicitudes de los usuarios.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="240" x="405" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-19" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;fontColor=#000066;" value="&lt;b&gt;Gestión de Incidentes&lt;br&gt;y Requerimientos&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="160" x="480" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-20" parent="1" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://icons.diagrams.net/icon-cache1/Media_Player-2104/headset-872.svg;fontColor=#007FFF;imageBackground=none;" value="" vertex="1">
+          <mxGeometry height="65" width="65" x="398.93" y="361.43" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-25" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;shapeInside=1;fixedSize=1;fillColor=#1F6FAF;strokeColor=#1F6FAF;size=66;" value="" vertex="1">
+          <mxGeometry height="185" width="396" x="684.5" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="support" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000099;fontSize=15;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="115" width="260" x="755" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-21" parent="1" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://icons.diagrams.net/icon-cache1/Octicons-2649/tools-1378.svg" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="780" y="361.43" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-23" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=13;" value="&lt;br&gt;&lt;font&gt;Atención de incidentes, mantenimiento&lt;br&gt;preventivo y correctivo del parque tecnológico.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="245" x="770" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-24" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 15px; color: rgb(0, 0, 102);&quot;&gt;Soporte Técnico y&lt;br&gt;Mantenimiento TI&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="140" x="865" y="361.43" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-26" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;shapeInside=1;fixedSize=1;fillColor=#1F6FAF;strokeColor=#1F6FAF;size=66;" value="" vertex="1">
+          <mxGeometry height="185" width="396" x="1060" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="gati" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF5FC;strokeColor=#FFFFFF;strokeWidth=6;dashed=1;fontSize=16;perimeterSpacing=8;" value="" vertex="1">
+          <mxGeometry height="165" width="245" x="1140" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-27" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=14;" value="&lt;br&gt;&lt;font&gt;Inventario, asignaciones, actas,&lt;br&gt;devoluciones, reasignaciones, bajas y trazabilidad del ciclo de vida.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="230" x="1155" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-28" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;fontColor=#000066;" value="&lt;b&gt;Gestión de Activos&lt;br&gt;Tecnológicos (GATI)&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="1230" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-29" parent="1" style="sketch=0;outlineConnect=0;gradientColor=none;fontColor=#545B64;strokeColor=none;fillColor=#000000;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.illustration_desktop;pointerEvents=1;strokeWidth=5;" value="" vertex="1">
+          <mxGeometry height="55.9" width="61.43" x="1155" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-30" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#000000;fillColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.automation;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="1165.71" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-31" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;" value="&lt;br&gt;&lt;font&gt;Administración de actas, documentos y evidencias relacionadas a activos y licencias&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="240" x="445" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-32" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=20;" value="&lt;b&gt;Gestión documental&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="210" x="445" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-33" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#009900;fillColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.documents;" value="" vertex="1">
+          <mxGeometry height="80" width="80" x="365" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-35" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;" value="&lt;br&gt;&lt;font&gt;Proceso de adquisiciones&lt;br&gt;y órdenes de compra.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="190" x="852.5" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-36" parent="1" style="text;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;&lt;b&gt;Abastecimiento&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="155" x="852.5" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-37" parent="1" style="verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;strokeWidth=1;shape=mxgraph.mockup.misc.shoppingCart;strokeColor=#009900;" value="" vertex="1">
+          <mxGeometry height="70" width="65" x="770" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-38" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=15;" value="&lt;br&gt;&lt;font&gt;Procesos administrativos de soporte para la operación del área.&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="230" x="1250" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-39" parent="1" style="text;whiteSpace=wrap;html=1;fontSize=20;" value="&lt;b&gt;Gestión administrativa&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="220" x="1240" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-40" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#009900;fillColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.automation;" value="" vertex="1">
+          <mxGeometry height="70" width="70" x="1165" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="wApLNnhj_ZwQmZbzRqCK-42" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=block;startFill=1;endArrow=block;endFill=1;strokeColor=#657786;strokeWidth=1.5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1304.66" y="255" as="sourcePoint" />
+            <mxPoint x="1304.66" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
