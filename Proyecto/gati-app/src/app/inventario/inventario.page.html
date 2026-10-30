@@ -27,9 +27,9 @@
             <ion-item lines="none" class="custom-input">
               <ion-select label="Estado" labelPlacement="floating" [multiple]="true" [(ngModel)]="filtroEstado" (ionChange)="aplicarFiltros()">
                 <ion-select-option value="Todos">Todos</ion-select-option>
-                <ion-select-option value="En Inventario">En Inventario</ion-select-option>
+                <ion-select-option value="En Inventario">En Bodega / Disp.</ion-select-option>
                 <ion-select-option value="Asignado">Asignados</ion-select-option>
-                <ion-select-option value="De Baja">De Baja</ion-select-option>
+                <ion-select-option value="De Baja">De Baja / Vencido</ion-select-option>
               </ion-select>
             </ion-item>
           </ion-col>
@@ -47,10 +47,10 @@
         <thead>
           <tr>
             <th>Categoría</th>
-            <th>N° Serie / ID</th>
-            <th>Descripción</th>
-            <th>Estado</th>
-            <th>Asignado a</th>
+            <th>N° Serie / Software</th>
+            <th>Descripción / Marca</th>
+            <th>Estado / Asientos</th>
+            <th>Asignado a / Detalle</th>
             <th>OC Origen</th>
             <th>Acciones</th>
           </tr>
@@ -63,18 +63,50 @@
             </td>
             <td><strong>{{ item.identificador }}</strong></td>
             <td>{{ item.descripcion }}</td>
+
+            <!-- ESTADO DINÁMICO: HARDWARE VS SOFTWARE -->
             <td>
-              <ion-badge [color]="item.estado === 'En Inventario' ? 'success' : item.estado === 'Asignado' ? 'tertiary' : 'danger'">
+              <ion-badge *ngIf="item.categoria === 'Hardware'" [color]="item.estado === 'En Inventario' ? 'success' : item.estado === 'Asignado' ? 'tertiary' : 'danger'">
                 {{ item.estado }}
               </ion-badge>
-            </td>
-            <td style="text-align: left; vertical-align: middle;">
-              <div *ngIf="item.asignadoA_nombre || item.asignadoA; else noAsignado" style="display: flex; flex-direction: column; align-items: flex-start;">
-                <span style="font-weight: 500; color: #333; line-height: 1.2;">{{ item.asignadoA_nombre || item.asignadoA }}</span>
-                <span style="font-size: 0.85em; color: #666; line-height: 1.2; margin-top: 3px;">{{ item.asignadoA_area || 'Área no especificada' }}</span>
+
+              <div *ngIf="item.categoria === 'Licencia'">
+                <!-- Si el contrato venció, muestra un badge rojo -->
+                <ion-badge *ngIf="item.estaVencida" color="danger">
+                  Contrato Caducado
+                </ion-badge>
+
+                <!-- Si el contrato es válido, muestra los asientos -->
+                <ion-badge *ngIf="!item.estaVencida" [color]="item.cantidadDisponible > 0 ? 'success' : 'danger'">
+                  {{ item.cantidadDisponible }} / {{ item.cantidadTotal }} Disponibles
+                </ion-badge>
+
+                <!-- La fecha cambia a rojo si está vencida -->
+                <div *ngIf="item.fechaVencimientoCalculada" style="font-size: 0.8rem; margin-top: 5px;" [style.color]="item.estaVencida ? '#dc3545' : '#666'">
+                  <ion-icon name="time-outline"></ion-icon> Vence: {{ item.fechaVencimientoCalculada | date:'dd/MM/yyyy' }}
+                </div>
               </div>
-              <ng-template #noAsignado><span style="color: #999;">—</span></ng-template>
             </td>
+
+            <!-- ASIGNACIÓN DINÁMICA -->
+            <td style="text-align: left; vertical-align: middle;">
+              <!-- Hardware -->
+              <div *ngIf="item.categoria === 'Hardware'">
+                <div *ngIf="item.asignadoA_nombre || item.asignadoA; else noAsignadoHW" style="display: flex; flex-direction: column; align-items: flex-start;">
+                  <span style="font-weight: 500; color: #333; line-height: 1.2;">{{ item.asignadoA_nombre || item.asignadoA }}</span>
+                  <span style="font-size: 0.85em; color: #666; line-height: 1.2; margin-top: 3px;">{{ item.asignadoA_area || 'Área no especificada' }}</span>
+                </div>
+                <ng-template #noAsignadoHW><span style="color: #999;">—</span></ng-template>
+              </div>
+
+              <!-- Software -->
+              <div *ngIf="item.categoria === 'Licencia'">
+                <ion-button size="small" fill="clear" color="primary" (click)="abrirModalVerAsignados(item)">
+                  Ver {{ item.asignados?.length || 0 }} Usuarios
+                </ion-button>
+              </div>
+            </td>
+
             <td>{{ item.ocAsociada || item.itemCompraRef || '—' }}</td>
             <td class="action-cell">
               <ion-button fill="clear" color="medium" (click)="abrirOpciones(item)">
@@ -90,58 +122,12 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button color="primary" (click)="setModalOpen(true)" class="fab-extendido">
-      <ion-icon name="add"></ion-icon>
-      <span class="fab-text">Ingreso Manual</span>
-    </ion-fab-button>
-  </ion-fab>
-
-  <ion-modal [isOpen]="isModalOpen" (didDismiss)="setModalOpen(false)">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar color="primary">
-          <ion-title>Registrar Hardware Manual</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="setModalOpen(false)"><ion-icon name="close-outline"></ion-icon></ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-        <form [formGroup]="equipoForm" (ngSubmit)="guardarEquipo()">
-          <ion-item class="custom-input ion-margin-bottom">
-            <ion-select label="Tipo de Equipo *" labelPlacement="floating" formControlName="tipo">
-              <ion-select-option value="Notebook">Notebook</ion-select-option>
-              <ion-select-option value="Monitor">Monitor</ion-select-option>
-            </ion-select>
-          </ion-item>
-          <ion-item class="custom-input ion-margin-bottom">
-            <ion-input label="Marca *" labelPlacement="floating" type="text" formControlName="marca"></ion-input>
-          </ion-item>
-          <ion-item class="custom-input ion-margin-bottom">
-            <ion-input label="Modelo *" labelPlacement="floating" type="text" formControlName="modelo"></ion-input>
-          </ion-item>
-          <ion-item class="custom-input ion-margin-bottom">
-            <ion-input label="Número de Serie *" labelPlacement="floating" type="text" formControlName="serie"></ion-input>
-          </ion-item>
-          <ion-item class="custom-input ion-margin-bottom">
-            <ion-input label="Orden de Compra *" labelPlacement="floating" type="text" formControlName="ocAsociada"></ion-input>
-          </ion-item>
-          <ion-button type="submit" expand="block" shape="round" color="primary" class="ion-margin-top" [disabled]="isSaving">
-            <ion-icon slot="start" name="save-outline"></ion-icon>
-            {{ isSaving ? 'Guardando...' : 'Registrar Equipo' }}
-          </ion-button>
-        </form>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
-
-  <!-- MODAL DE ASIGNACIÓN -->
+  <!-- MODAL DE ASIGNACIÓN HW (CON CÁMARA) -->
   <ion-modal [isOpen]="isAsignarModalOpen" (didDismiss)="cerrarModalAsignar()">
     <ng-template>
       <ion-header>
         <ion-toolbar color="primary">
-          <ion-title>Vincular a Funcionario</ion-title>
+          <ion-title>Vincular Equipo a Funcionario</ion-title>
           <ion-buttons slot="end">
             <ion-button (click)="cerrarModalAsignar()"><ion-icon name="close-outline"></ion-icon></ion-button>
           </ion-buttons>
@@ -152,7 +138,7 @@
           <ion-card class="ion-margin-bottom shadow-sm">
             <ion-card-content>
               <ion-card-title style="font-size: 1.1rem; margin-bottom: 15px;">
-                <ion-icon [name]="equipoSeleccionado.categoria === 'Hardware' ? 'desktop-outline' : 'code-slash-outline'" color="primary" class="ion-margin-end"></ion-icon>
+                <ion-icon name="desktop-outline" color="primary" class="ion-margin-end"></ion-icon>
                 Resumen del Activo
               </ion-card-title>
               <ion-item class="ion-margin-bottom" lines="none" [color]="colorObsolescencia" style="border-radius: 8px;">
@@ -163,7 +149,6 @@
               </ion-item>
               <p style="margin: 0 0 5px 0;"><strong>ID / Serie:</strong> {{ equipoSeleccionado.identificador }}</p>
               <p style="margin: 0 0 5px 0;"><strong>Descripción:</strong> {{ equipoSeleccionado.descripcion }}</p>
-              <p style="margin: 0;"><strong>Categoría:</strong> {{ equipoSeleccionado.categoria }}</p>
             </ion-card-content>
           </ion-card>
 
@@ -186,7 +171,6 @@
       </ion-content>
       <ion-footer>
         <ion-toolbar class="ion-padding-horizontal">
-          <!-- Este es el botón y el input que funcionan perfecto -->
           <input type="file" accept="image/*" capture="environment" (change)="procesarFotoCedula($event)" #fotoCedula style="display: none;">
           <ion-button expand="block" color="success" shape="round" (click)="fotoCedula.click()" [disabled]="!funcionarioSeleccionado || isSaving">
             <ion-icon name="camera-outline" slot="start" *ngIf="!isSaving"></ion-icon>
@@ -198,7 +182,109 @@
     </ng-template>
   </ion-modal>
 
-  <!-- NUEVO MODAL DE DEVOLUCIÓN (Copia exacta del de asignación para que no falle) -->
+  <!-- MODAL ASIGNAR LICENCIA (SIN CÁMARA) -->
+  <ion-modal [isOpen]="isAsignarLicenciaModalOpen" (didDismiss)="cerrarModalAsignarLicencia()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="tertiary">
+          <ion-title>Asignar Licencia Digital</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalAsignarLicencia()"><ion-icon name="close-outline"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding background-light">
+        <div class="form-card" *ngIf="equipoSeleccionado">
+          <ion-card class="ion-margin-bottom shadow-sm">
+            <ion-card-content>
+              <ion-card-title style="font-size: 1.1rem; margin-bottom: 15px;">
+                <ion-icon name="code-slash-outline" color="tertiary" class="ion-margin-end"></ion-icon>
+                {{ equipoSeleccionado.identificador }}
+              </ion-card-title>
+
+              <!-- CAJA DE TIEMPO RESTANTE (SOFTWARE) -->
+              <ion-item class="ion-margin-bottom" lines="none" [color]="colorObsolescencia" style="border-radius: 8px;">
+                <ion-icon name="time-outline" slot="start"></ion-icon>
+                <ion-label class="ion-text-wrap">
+                  <p style="color: white; font-weight: 500;">{{ mensajeObsolescencia }}</p>
+                </ion-label>
+              </ion-item>
+
+              <p style="margin: 0 0 5px 0;"><strong>Marca:</strong> {{ equipoSeleccionado.marca }}</p>
+              <p style="margin: 0;"><strong>Asientos Disponibles:</strong> {{ equipoSeleccionado.cantidadDisponible }}</p>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-item class="custom-input ion-margin-bottom" lines="none" style="--background: #ffffff; border: 1px solid #ddd; border-radius: 8px;">
+            <ion-label position="stacked">1. Seleccione Área</ion-label>
+            <ion-select [(ngModel)]="areaSeleccionada" (ionChange)="alSeleccionarArea()" placeholder="Desplegar áreas">
+              <ion-select-option *ngFor="let area of areas" [value]="area">{{ area }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item *ngIf="areaSeleccionada" class="custom-input ion-margin-bottom" lines="none" style="--background: #ffffff; border: 1px solid #ddd; border-radius: 8px;">
+            <ion-label position="stacked">2. Seleccione Funcionario</ion-label>
+            <ion-select [(ngModel)]="funcionarioSeleccionado" placeholder="Desplegar personal">
+              <ion-select-option *ngFor="let f of funcionariosFiltrados" [value]="f">
+                {{ f.nombreCompleto || 'Sin Nombre Registrado' }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+      </ion-content>
+      <ion-footer>
+        <ion-toolbar class="ion-padding-horizontal">
+          <ion-button expand="block" color="tertiary" shape="round" (click)="procesarAsignacionLicencia()" [disabled]="!funcionarioSeleccionado || isSaving">
+            <ion-spinner name="crescent" *ngIf="isSaving"></ion-spinner>
+            <span *ngIf="!isSaving">Vincular al Usuario</span>
+          </ion-button>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL VER Y DESVINCULAR USUARIOS DE LICENCIA -->
+  <ion-modal [isOpen]="isVerAsignadosModalOpen" (didDismiss)="cerrarModalVerAsignados()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="dark">
+          <ion-title>Usuarios Asignados</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cerrarModalVerAsignados()"><ion-icon name="close-outline"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding background-light">
+        <div *ngIf="licenciaParaVer" class="ion-margin-bottom">
+          <h2 style="font-size: 1.2rem; color: #333; margin-bottom: 5px;">{{ licenciaParaVer.identificador }}</h2>
+          <p style="color: #666; margin: 0;">{{ licenciaParaVer.cantidadDisponible }} / {{ licenciaParaVer.cantidadTotal }} asientos libres</p>
+        </div>
+
+        <ion-card *ngIf="!licenciaParaVer?.asignados || licenciaParaVer.asignados.length === 0" class="shadow-sm">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="people-outline" style="font-size: 3rem; color: #ccc;"></ion-icon>
+            <p>Nadie está usando esta licencia actualmente.</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-list *ngIf="licenciaParaVer?.asignados?.length > 0" class="shadow-sm" style="border-radius: 8px;">
+          <ion-item *ngFor="let persona of licenciaParaVer.asignados; let i = index">
+            <ion-icon name="person-circle-outline" slot="start" color="medium"></ion-icon>
+            <ion-label class="ion-text-wrap">
+              <h3 style="font-weight: bold; color: #333;">{{ persona.nombre || persona.nombreCompleto }}</h3>
+              <p>{{ persona.area }}</p>
+              <p style="font-size: 0.8rem; color: #888;">Asignado: {{ persona.fechaEntrega | date:'dd/MM/yyyy' }}</p>
+            </ion-label>
+            <ion-button slot="end" fill="clear" color="danger" (click)="desvincularLicenciaUsuario(persona)" [disabled]="isSaving">
+              <ion-icon name="close-circle-outline" slot="start"></ion-icon> Quitar
+            </ion-button>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- MODAL DE DEVOLUCIÓN HW -->
   <ion-modal [isOpen]="isDevolverModalOpen" (didDismiss)="cerrarModalDevolver()">
     <ng-template>
       <ion-header>
@@ -213,24 +299,13 @@
         <div class="form-card" *ngIf="equipoParaDevolver">
           <ion-card class="ion-margin-bottom shadow-sm">
             <ion-card-content>
-              <p style="font-size: 1.1rem; color: #333;">
-                Estás a punto de desvincular este equipo y devolverlo al inventario.
-              </p>
-              <div style="background: #f9f9f9; padding: 10px; border-radius: 8px; margin-top: 10px;">
-                <p style="margin: 0 0 5px 0;"><strong>Funcionario actual:</strong> {{ equipoParaDevolver.asignadoA_nombre }}</p>
-                <p style="margin: 0 0 5px 0;"><strong>Equipo:</strong> {{ equipoParaDevolver.descripcion }}</p>
-                <p style="margin: 0;"><strong>ID / Serie:</strong> {{ equipoParaDevolver.identificador }}</p>
-              </div>
-              <p style="color: #666; margin-top: 15px; font-size: 0.95rem;">
-                Para generar el Acta de Devolución, captura la cédula de la persona que entrega el equipo.
-              </p>
+              <p style="font-size: 1.1rem; color: #333;">Estás a punto de desvincular este equipo físico y devolverlo al inventario.</p>
             </ion-card-content>
           </ion-card>
         </div>
       </ion-content>
       <ion-footer>
         <ion-toolbar class="ion-padding-horizontal">
-          <!-- Exactamente la misma lógica de botón e input que sí funciona -->
           <input type="file" accept="image/*" capture="environment" (change)="procesarFotoDevolucion($event)" #fotoDevolucion style="display: none;">
           <ion-button expand="block" color="warning" shape="round" (click)="fotoDevolucion.click()" [disabled]="isSaving">
             <ion-icon name="camera-outline" slot="start" *ngIf="!isSaving"></ion-icon>
@@ -242,7 +317,7 @@
     </ng-template>
   </ion-modal>
 
-  <!-- MODAL DE HISTORIAL -->
+  <!-- MODAL HISTORIAL -->
   <ion-modal [isOpen]="isHistorialModalOpen" (didDismiss)="cerrarModalHistorial()">
     <ng-template>
       <ion-header>
@@ -254,30 +329,13 @@
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding background-light">
-        <div *ngIf="equipoParaHistorial" class="ion-margin-bottom">
-          <h2 style="font-size: 1.2rem; color: #333;">{{ equipoParaHistorial.descripcion }}</h2>
-          <p style="color: #666; margin: 0;">Serie/ID: <strong>{{ equipoParaHistorial.identificador }}</strong></p>
-        </div>
-        <ion-card *ngIf="historialActivo.length === 0" class="shadow-sm">
-          <ion-card-content class="ion-text-center">
-            <ion-icon name="time-outline" style="font-size: 3rem; color: #ccc;"></ion-icon>
-            <p>Aún no hay movimientos registrados para este equipo.</p>
-          </ion-card-content>
-        </ion-card>
         <ion-list *ngIf="historialActivo.length > 0" class="shadow-sm" style="border-radius: 8px;">
-          <ion-item *ngFor="let registro of historialActivo; let i = index" [lines]="i === historialActivo.length - 1 ? 'none' : 'full'">
-            <ion-icon name="checkmark-circle" slot="start" color="tertiary" *ngIf="registro.tipoAccion.includes('Asignación')"></ion-icon>
-            <ion-icon name="return-down-back-outline" slot="start" color="warning" *ngIf="registro.tipoAccion.includes('Devolución')"></ion-icon>
-            <ion-icon name="trash-outline" slot="start" color="danger" *ngIf="registro.tipoAccion.includes('Baja')"></ion-icon>
+          <ion-item *ngFor="let registro of historialActivo">
             <ion-label class="ion-text-wrap">
               <h3 style="font-weight: bold; color: #333;">{{ registro.tipoAccion }}</h3>
               <p><strong>Responsable:</strong> {{ registro.funcionario }} ({{ registro.area }})</p>
-              <p style="font-size: 0.8rem; color: #888;">
-                <ion-icon name="calendar-outline"></ion-icon> {{ registro.fecha | date:'dd/MM/yyyy HH:mm' }}
-              </p>
-              <ion-button *ngIf="registro.actaUrl" [href]="registro.actaUrl" target="_blank" fill="clear" size="small" style="margin-top: 5px;">
-                <ion-icon name="document-text-outline" slot="start"></ion-icon> Ver Acta PDF
-              </ion-button>
+              <p style="font-size: 0.8rem; color: #888;">{{ registro.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
+              <ion-button *ngIf="registro.actaUrl" [href]="registro.actaUrl" target="_blank" fill="clear" size="small">Ver Acta</ion-button>
             </ion-label>
           </ion-item>
         </ion-list>

@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, updateDoc, orderBy } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, updateDoc, orderBy, increment, arrayUnion, arrayRemove } from '@angular/fire/firestore';
+import { FirebaseApp } from '@angular/fire/app';
+import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { Auth } from '@angular/fire/auth';
 
 @Injectable({
@@ -13,14 +15,49 @@ export class DatabaseService {
 
   async registrarHardware(equipo: any) {
     try {
+      // Tomamos la fecha de la OC si existe, si no, usamos la del servidor
+      const fechaFinal = equipo.fechaSimulada ? new Date(equipo.fechaSimulada).toISOString() : serverTimestamp();
+
       const hardwareRef = collection(this.firestore, 'hardware');
       const docRef = await addDoc(hardwareRef, {
         ...equipo,
-        fechaIngreso: serverTimestamp()
+        fechaIngreso: fechaFinal
       });
       return docRef.id;
     } catch (error) {
       console.error('Error al guardar en Firestore:', error);
+      throw error;
+    }
+  }
+
+  async registrarLicenciaLote(licencia: any) {
+    try {
+      // Tomamos la fecha de la OC si existe, si no, usamos la del servidor
+      const fechaFinal = licencia.fechaSimulada ? new Date(licencia.fechaSimulada).toISOString() : serverTimestamp();
+
+      const softwareRef = collection(this.firestore, 'licencias_software');
+      const docRef = await addDoc(softwareRef, {
+        ...licencia,
+        fechaIngreso: fechaFinal,
+        cantidadDisponible: licencia.cantidadTotal,
+        asignados: []
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error al guardar licencia en Firestore:', error);
+      throw error;
+    }
+  }
+
+  // Función auxiliar para saber si un ID de contrato ya fue ingresado antes
+  async verificarContratoExiste(idContrato: string): Promise<boolean> {
+    try {
+      const softwareRef = collection(this.firestore, 'licencias_software');
+      const q = query(softwareRef, where('identificador', '==', idContrato.toUpperCase()));
+      const querySnapshot = await getDocs(q);
+      return !querySnapshot.empty;
+    } catch (error) {
+      console.error('Error al verificar contrato:', error);
       throw error;
     }
   }
@@ -33,6 +70,18 @@ export class DatabaseService {
       return querySnapshot.docs.map(doc => doc.data());
     } catch (error) {
       console.error('Error al leer de Firestore:', error);
+      return [];
+    }
+  }
+
+  async obtenerLicenciasPorOC(numeroOC: string) {
+    try {
+      const softwareRef = collection(this.firestore, 'licencias_software');
+      const q = query(softwareRef, where('ocAsociada', '==', numeroOC.toUpperCase()));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => doc.data());
+    } catch (error) {
+      console.error('Error al leer licencias de Firestore:', error);
       return [];
     }
   }
@@ -224,7 +273,44 @@ export class DatabaseService {
     }
   }
 
-  // SUBIDA DIRECTA POR HTTPS A FIREBASE STORAGE (Inmune al error ref._location)
+  async asignarLicencia(idSoftware: string, destino: any): Promise<void> {
+    const softwareRef = doc(this.firestore, `licencias_software/${idSoftware}`);
+    const fechaActual = new Date().toISOString();
+
+    const asignacion = { ...destino, fechaEntrega: fechaActual };
+
+    await updateDoc(softwareRef, {
+      cantidadDisponible: increment(-1),
+      asignados: arrayUnion(asignacion)
+    });
+
+    const historialRef = collection(this.firestore, `licencias_software/${idSoftware}/historial`);
+    await addDoc(historialRef, {
+      tipoAccion: 'Asignación de Licencia',
+      funcionario: destino.nombre,
+      area: destino.area,
+      fecha: fechaActual
+    });
+  }
+
+  async desvincularLicencia(idSoftware: string, personaAsignada: any): Promise<void> {
+    const softwareRef = doc(this.firestore, `licencias_software/${idSoftware}`);
+    const fechaActual = new Date().toISOString();
+
+    await updateDoc(softwareRef, {
+      cantidadDisponible: increment(1),
+      asignados: arrayRemove(personaAsignada)
+    });
+
+    const historialRef = collection(this.firestore, `licencias_software/${idSoftware}/historial`);
+    await addDoc(historialRef, {
+      tipoAccion: 'Revocación de Licencia',
+      funcionario: personaAsignada.nombre || 'N/A',
+      area: personaAsignada.area || 'N/A',
+      fecha: fechaActual
+    });
+  }
+
   async subirActaPDF(base64Data: string, nombreArchivo: string): Promise<string> {
     console.log('1. Empaquetando PDF binario para subida directa...');
     const base64Limpio = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
@@ -267,5 +353,26 @@ export class DatabaseService {
 
     console.log('3. ¡Archivo subido! URL Lista:', urlFinal);
     return urlFinal;
+  }
+
+  // --- NUEVAS FUNCIONES PARA GESTIÓN DE USUARIOS ---
+  async actualizarRolUsuario(idUsuario: string, nuevoRol: string): Promise<void> {
+    try {
+      const usuarioRef = doc(this.firestore, `usuarios_sistema/${idUsuario}`);
+      await updateDoc(usuarioRef, { rol: nuevoRol });
+    } catch (error) {
+      console.error('Error al actualizar rol:', error);
+      throw error;
+    }
+  }
+
+  async actualizarEstadoUsuario(idUsuario: string, nuevoEstado: string): Promise<void> {
+    try {
+      const usuarioRef = doc(this.firestore, `usuarios_sistema/${idUsuario}`);
+      await updateDoc(usuarioRef, { estado: nuevoEstado });
+    } catch (error) {
+      console.error('Error al actualizar estado:', error);
+      throw error;
+    }
   }
 }

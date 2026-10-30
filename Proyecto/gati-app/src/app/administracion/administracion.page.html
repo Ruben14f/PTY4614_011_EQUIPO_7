@@ -66,22 +66,35 @@
     </ion-fab>
   </div>
 
-  <!-- VISTA 2: USUARIOS DEL SISTEMA -->
+ <!-- VISTA 2: USUARIOS DEL SISTEMA -->
   <div *ngIf="viewMode === 'usuarios'">
     <ion-card class="table-card">
       <ion-card-content class="table-container">
         <table class="custom-table">
           <thead>
-            <tr><th>Correo Electrónico</th><th>Rol de Acceso</th><th>Estado de Cuenta</th></tr>
+            <tr>
+              <th>Correo Electrónico</th>
+              <th>Rol de Acceso</th>
+              <th>Estado de Cuenta</th>
+              <th style="width: 100px; text-align: center;">Acciones</th> <!-- NUEVA COLUMNA -->
+            </tr>
           </thead>
           <tbody>
             <tr *ngFor="let u of listaUsuarios">
-              <td><strong>{{ u.correo }}</strong></td>
-              <td><ion-badge color="tertiary">{{ u.rol }}</ion-badge></td>
+              <!-- El texto se vuelve gris si el usuario está inactivo -->
+              <td><strong [style.color]="u.estado === 'Activo' ? '#333' : '#999'">{{ u.correo }}</strong></td>
+              <td><ion-badge color="tertiary" [style.opacity]="u.estado === 'Activo' ? 1 : 0.5">{{ u.rol }}</ion-badge></td>
               <td><ion-badge [color]="u.estado === 'Activo' ? 'success' : 'danger'">{{ u.estado }}</ion-badge></td>
+
+              <!-- NUEVO BOTÓN DE ACCIONES -->
+              <td style="text-align: center;">
+                <ion-button fill="clear" color="medium" (click)="abrirOpcionesUsuario(u)">
+                  <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+                </ion-button>
+              </td>
             </tr>
             <tr *ngIf="listaUsuarios.length === 0">
-              <td colspan="3" class="ion-text-center">No hay usuarios del sistema registrados.</td>
+              <td colspan="4" class="ion-text-center">No hay usuarios del sistema registrados.</td>
             </tr>
           </tbody>
         </table>

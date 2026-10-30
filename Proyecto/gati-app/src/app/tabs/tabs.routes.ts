@@ -7,9 +7,8 @@ export const routes: Routes = [
     component: TabsPage,
     children: [
       {
-        path: 'tab1',
-        loadComponent: () =>
-          import('../tab1/tab1.page').then((m) => m.Tab1Page),
+        path: 'dashboard',
+        loadComponent: () => import('../tab1/tab1.page').then((m) => m.Tab1Page),
       },
       {
         path: 'inventario',
@@ -18,33 +17,22 @@ export const routes: Routes = [
       {
         path: 'recepcion',
         loadComponent: () => import('../recepcion/recepcion.page').then(m => m.RecepcionPage),
-        // Agregamos el guardián funcional en línea
         canDeactivate: [(component: any) => component.confirmarSalida()]
       },
       {
-          path: 'administracion',
-          loadComponent: () => import('../administracion/administracion.page').then(m => m.AdministracionPage)
-        },
-      {
-        path: 'tab2',
-        loadComponent: () =>
-          import('../tab2/tab2.page').then((m) => m.Tab2Page),
-      },
-      {
-        path: 'tab3',
-        loadComponent: () =>
-          import('../tab3/tab3.page').then((m) => m.Tab3Page),
+        path: 'administracion',
+        loadComponent: () => import('../administracion/administracion.page').then(m => m.AdministracionPage)
       },
       {
         path: '',
-        redirectTo: '/tabs/tab1',
+        redirectTo: '/tabs/dashboard',
         pathMatch: 'full',
       },
     ],
   },
   {
     path: '',
-    redirectTo: '/tabs/tab1',
+    redirectTo: '/tabs/dashboard',
     pathMatch: 'full',
   },
 ];

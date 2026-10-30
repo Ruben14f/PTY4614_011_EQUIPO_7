@@ -19,12 +19,10 @@ import {
   saveOutline, hardwareChipOutline, checkmarkCircle, checkmarkCircleOutline, logOutOutline,
   add, ellipsisVertical, desktopOutline, codeSlashOutline, closeOutline,
   personAddOutline, trashOutline, returnDownBackOutline, timeOutline, calendarOutline, warningOutline,
-  cameraOutline, documentTextOutline
+  cameraOutline, documentTextOutline, peopleOutline, personCircleOutline, closeCircleOutline
 } from 'ionicons/icons';
 
 import { DatabaseService } from '../services/database.service';
-
-// Importamos jsPDF en lugar de pdfmake
 import { jsPDF } from 'jspdf';
 
 @Component({
@@ -51,13 +49,16 @@ export class InventarioPage {
   areas: string[] = [];
   areaSeleccionada: string = '';
   funcionariosFiltrados: any[] = [];
+
   isAsignarModalOpen: boolean = false;
   equipoSeleccionado: any = null;
   funcionarioSeleccionado: any = null;
-
-  // Variables agregadas para el Modal de Devolución
   isDevolverModalOpen: boolean = false;
   equipoParaDevolver: any = null;
+
+  isAsignarLicenciaModalOpen: boolean = false;
+  isVerAsignadosModalOpen: boolean = false;
+  licenciaParaVer: any = null;
 
   inventarioCompleto: any[] = [];
   inventarioFiltrado: any[] = [];
@@ -71,7 +72,6 @@ export class InventarioPage {
   mensajeObsolescencia: string = '';
   colorObsolescencia: string = 'success';
 
-  // Inyecciones modernas para limpiar las advertencias de ESLint
   private auth = inject(Auth);
   private router = inject(Router);
   private alertController = inject(AlertController);
@@ -86,7 +86,7 @@ export class InventarioPage {
       saveOutline, hardwareChipOutline, checkmarkCircle, checkmarkCircleOutline, logOutOutline,
       add, ellipsisVertical, desktopOutline, codeSlashOutline, closeOutline,
       personAddOutline, trashOutline, returnDownBackOutline, timeOutline, calendarOutline, warningOutline,
-      cameraOutline, documentTextOutline
+      cameraOutline, documentTextOutline, peopleOutline, personCircleOutline, closeCircleOutline
     });
 
     this.equipoForm = this.fb.group({
@@ -109,6 +109,7 @@ export class InventarioPage {
   async cargarInventario() {
     const hardware = await this.dbService.obtenerTodoHardware();
     const software = await this.dbService.obtenerTodoSoftware();
+    const hoy = new Date();
 
     const hwNormalizado = hardware.map((h: any) => ({
       ...h,
@@ -118,12 +119,30 @@ export class InventarioPage {
       ocAsociada: h.ocAsociada || h.numeroOC
     }));
 
-    const swNormalizado = software.map((s: any) => ({
-      ...s,
-      categoria: 'Licencia',
-      identificador: s.nombreSoftware || 'Sin ID',
-      descripcion: `${s.tipoLicencia || ''} ${s.fabricante || ''}`
-    }));
+    const swNormalizado = software.map((s: any) => {
+      let fechaVence = null;
+      let estaVencida = false;
+
+      if (s.fechaIngreso) {
+        const fIngreso = s.fechaIngreso.toDate ? s.fechaIngreso.toDate() : new Date(s.fechaIngreso);
+        fechaVence = new Date(fIngreso);
+        fechaVence.setFullYear(fechaVence.getFullYear() + 1);
+        estaVencida = fechaVence < hoy;
+      }
+
+      return {
+        ...s,
+        categoria: 'Licencia',
+        identificador: s.identificador || s.modelo || s.nombreSoftware || 'Software',
+        descripcion: `${s.marca || 'N/A'}`,
+        cantidadTotal: s.cantidadTotal || 0,
+        cantidadDisponible: s.cantidadDisponible !== undefined ? s.cantidadDisponible : (s.cantidadTotal || 0),
+        asignados: s.asignados || [],
+        fechaVencimientoCalculada: fechaVence,
+        estaVencida: estaVencida, // NUEVO INDICADOR DE CADUCIDAD
+        ocAsociada: s.ocAsociada || s.numeroOC
+      };
+    });
 
     this.inventarioCompleto = [...hwNormalizado, ...swNormalizado];
     this.aplicarFiltros();
@@ -135,7 +154,16 @@ export class InventarioPage {
     else if (this.filtroCategoria === 'software') temp = temp.filter(item => item.categoria === 'Licencia');
 
     if (this.filtroEstado && this.filtroEstado.length > 0 && !this.filtroEstado.includes('Todos')) {
-      temp = temp.filter(item => this.filtroEstado.includes(item.estado));
+      temp = temp.filter(item => {
+        if (item.categoria === 'Hardware') return this.filtroEstado.includes(item.estado);
+
+        // Filtros actualizados para Software considerando la caducidad
+        if (this.filtroEstado.includes('De Baja') && item.estaVencida) return true;
+        if (this.filtroEstado.includes('En Inventario') && item.cantidadDisponible > 0 && !item.estaVencida) return true;
+        if (this.filtroEstado.includes('Asignado') && item.cantidadDisponible === 0 && !item.estaVencida) return true;
+
+        return false;
+      });
     }
 
     if (this.textoBusqueda.trim() !== '') {
@@ -143,8 +171,7 @@ export class InventarioPage {
       temp = temp.filter(item =>
         (item.identificador && item.identificador.toLowerCase().includes(termino)) ||
         (item.descripcion && item.descripcion.toLowerCase().includes(termino)) ||
-        (item.asignadoA_nombre && item.asignadoA_nombre.toLowerCase().includes(termino)) ||
-        (item.asignadoA && item.asignadoA.toLowerCase().includes(termino))
+        (item.asignadoA_nombre && item.asignadoA_nombre.toLowerCase().includes(termino))
       );
     }
     this.inventarioFiltrado = temp;
@@ -153,17 +180,26 @@ export class InventarioPage {
 
   async abrirOpciones(item: any) {
     const botones = [];
-    if (item.estado === 'En Inventario') {
-      botones.push({ text: 'Asignar a Funcionario', icon: 'person-add-outline', handler: () => { setTimeout(() => this.abrirModalAsignar(item), 150); } });
+
+    if (item.categoria === 'Hardware') {
+      if (item.estado === 'En Inventario') {
+        botones.push({ text: 'Asignar a Funcionario', icon: 'person-add-outline', handler: () => { setTimeout(() => this.abrirModalAsignar(item), 150); } });
+      }
+      if (item.estado === 'Asignado') {
+        botones.push({ text: 'Desvincular (Devolver a bodega)', icon: 'return-down-back-outline', handler: () => { this.abrirModalDevolver(item); } });
+      }
+      if (item.estado !== 'De Baja') {
+        botones.push({ text: 'Dar de Baja (Retirar)', icon: 'trash-outline', role: 'destructive', handler: () => this.confirmarBaja(item) });
+      }
+    } else {
+      // Bloqueamos la asignación si el contrato está vencido
+      if (item.cantidadDisponible > 0 && !item.estaVencida) {
+        botones.push({ text: 'Asignar Licencia', icon: 'person-add-outline', handler: () => { this.abrirModalAsignarLicencia(item); } });
+      }
+      botones.push({ text: 'Ver Personal Asignado', icon: 'people-outline', handler: () => { this.abrirModalVerAsignados(item); } });
     }
-    if (item.estado === 'Asignado') {
-      // AQUÍ SE ABRE EL MODAL DE DEVOLUCIÓN EN VEZ DE LA ALERTA
-      botones.push({ text: 'Desvincular (Devolver a bodega)', icon: 'return-down-back-outline', handler: () => { this.abrirModalDevolver(item); } });
-    }
-    if (item.estado !== 'De Baja') {
-      botones.push({ text: 'Dar de Baja (Retirar)', icon: 'trash-outline', role: 'destructive', handler: () => this.confirmarBaja(item) });
-    }
-    botones.push({ text: 'Ver Historial de Asignaciones', icon: 'time-outline', handler: () => { setTimeout(() => this.abrirModalHistorial(item), 150); } });
+
+    botones.push({ text: 'Ver Historial', icon: 'time-outline', handler: () => { setTimeout(() => this.abrirModalHistorial(item), 150); } });
     botones.push({ text: 'Cancelar', icon: 'close-outline', role: 'cancel' });
 
     const actionSheet = await this.actionSheetCtrl.create({ header: `Opciones: ${item.identificador}`, buttons: botones });
@@ -182,17 +218,90 @@ export class InventarioPage {
     this.funcionarioSeleccionado = null;
     this.isSaving = false;
   }
-
+  abrirModalAsignar(equipo: any) {
+    this.equipoSeleccionado = equipo;
+    this.areaSeleccionada = '';
+    this.funcionarioSeleccionado = null;
+    this.funcionariosFiltrados = [];
+    this.calcularObsolescencia(equipo);
+    this.isAsignarModalOpen = true;
+    this.cdr.detectChanges();
+  }
   abrirModalDevolver(item: any) {
     this.equipoParaDevolver = item;
     this.isDevolverModalOpen = true;
     this.cdr.detectChanges();
   }
-
   cerrarModalDevolver() {
     this.isDevolverModalOpen = false;
     this.equipoParaDevolver = null;
     this.isSaving = false;
+  }
+
+  abrirModalAsignarLicencia(item: any) {
+    this.equipoSeleccionado = item;
+    this.areaSeleccionada = '';
+    this.funcionarioSeleccionado = null;
+    this.funcionariosFiltrados = [];
+    this.calcularObsolescencia(item);
+    this.isAsignarLicenciaModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarModalAsignarLicencia() {
+    this.isAsignarLicenciaModalOpen = false;
+    this.equipoSeleccionado = null;
+    this.funcionarioSeleccionado = null;
+    this.isSaving = false;
+  }
+
+  abrirModalVerAsignados(item: any) {
+    this.licenciaParaVer = item;
+    this.isVerAsignadosModalOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarModalVerAsignados() {
+    this.isVerAsignadosModalOpen = false;
+    this.licenciaParaVer = null;
+  }
+
+  async procesarAsignacionLicencia() {
+    if (!this.funcionarioSeleccionado) return;
+    this.isSaving = true;
+
+    try {
+      const destino = {
+        nombre: this.funcionarioSeleccionado.nombreCompleto || 'Sin Nombre',
+        rut: this.funcionarioSeleccionado.rut || '',
+        area: this.funcionarioSeleccionado.area || 'Sin Área'
+      };
+
+      await this.dbService.asignarLicencia(this.equipoSeleccionado.id, destino);
+      this.mostrarMensaje('Licencia asignada correctamente', 'success');
+      this.cerrarModalAsignarLicencia();
+      this.cargarInventario();
+    } catch (error) {
+      this.mostrarMensaje('Error al asignar licencia', 'danger');
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  async desvincularLicenciaUsuario(persona: any) {
+    this.isSaving = true;
+    try {
+      await this.dbService.desvincularLicencia(this.licenciaParaVer.id, persona);
+      this.licenciaParaVer.asignados = this.licenciaParaVer.asignados.filter((p: any) => p.rut !== persona.rut);
+      this.licenciaParaVer.cantidadDisponible++;
+
+      this.mostrarMensaje('Licencia devuelta al pozo de disponibles', 'success');
+      this.cargarInventario();
+    } catch (error) {
+      this.mostrarMensaje('Error al quitar licencia', 'danger');
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   async formatearImagenParaPDF(file: File): Promise<string> {
@@ -222,115 +331,68 @@ export class InventarioPage {
     });
   }
 
-  // --- LÓGICA CON JSPDF (SÍNCRONA, RÁPIDA Y SIN BLOQUEOS) QUE TÚ COMPROBASTE ---
   async procesarFotoCedula(event: any) {
     const file = event.target.files[0];
     if (!file) return;
-
-    if (!this.funcionarioSeleccionado) {
-      this.mostrarMensaje('Seleccione un funcionario antes de firmar.', 'warning');
-      return;
-    }
 
     this.isSaving = true;
     this.cdr.detectChanges();
 
     try {
-      console.log('1. Formateando imagen...');
+      this.mostrarMensaje('Generando acta, por favor espera...', 'warning');
       const base64Image = await this.formatearImagenParaPDF(file);
 
       const nombreFuncionario = this.funcionarioSeleccionado.nombreCompleto || 'Sin Nombre';
       const areaFuncionario = this.funcionarioSeleccionado.area || 'Sin Área';
 
-      console.log('2. Generando PDF con jsPDF...');
       const doc = new jsPDF();
-
-      // Configuración del documento
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16); doc.setFont("helvetica", "bold");
       doc.text('ACTA DE ENTREGA DE EQUIPAMIENTO - GATI', 105, 20, { align: 'center' });
 
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12); doc.setFont("helvetica", "normal");
       doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 35);
 
-      const textoDeclaracion = `Yo, ${nombreFuncionario}, del departamento de ${areaFuncionario}, por medio de la imagen de mi cédula de identidad adjunta en este documento, certifico haber recibido conforme el siguiente equipamiento informático para el desempeño de mis funciones:`;
+      const textoDeclaracion = `Yo, ${nombreFuncionario}, del departamento de ${areaFuncionario}, por medio de la imagen de mi cédula de identidad adjunta en este documento, certifico haber recibido conforme el siguiente equipamiento informático:`;
       const lineasTexto = doc.splitTextToSize(textoDeclaracion, 170);
       doc.text(lineasTexto, 20, 45);
 
       let yPos = 45 + (lineasTexto.length * 7) + 5;
 
-      // Detalles del equipo
-      doc.setFont("helvetica", "bold");
-      doc.text(`- Tipo de Activo:`, 25, yPos);
-      doc.setFont("helvetica", "normal");
-      doc.text(`${this.equipoSeleccionado.tipo || this.equipoSeleccionado.categoria}`, 65, yPos);
-      yPos += 7;
+      doc.setFont("helvetica", "bold"); doc.text(`- Tipo de Activo:`, 25, yPos);
+      doc.setFont("helvetica", "normal"); doc.text(`${this.equipoSeleccionado.tipo || this.equipoSeleccionado.categoria}`, 65, yPos); yPos += 7;
+      doc.setFont("helvetica", "bold"); doc.text(`- Marca:`, 25, yPos);
+      doc.setFont("helvetica", "normal"); doc.text(`${this.equipoSeleccionado.marca || 'N/A'}`, 45, yPos); yPos += 7;
+      doc.setFont("helvetica", "bold"); doc.text(`- Modelo:`, 25, yPos);
+      doc.setFont("helvetica", "normal"); doc.text(`${this.equipoSeleccionado.modelo || 'N/A'}`, 48, yPos); yPos += 7;
+      doc.setFont("helvetica", "bold"); doc.text(`- Serie / ID:`, 25, yPos);
+      doc.setFont("helvetica", "normal"); doc.text(`${this.equipoSeleccionado.identificador}`, 52, yPos); yPos += 15;
+      doc.setFont("helvetica", "bold"); doc.text('Cédula de Identidad del Receptor:', 20, yPos); yPos += 5;
 
-      doc.setFont("helvetica", "bold");
-      doc.text(`- Marca:`, 25, yPos);
-      doc.setFont("helvetica", "normal");
-      doc.text(`${this.equipoSeleccionado.marca || 'N/A'}`, 45, yPos);
-      yPos += 7;
-
-      doc.setFont("helvetica", "bold");
-      doc.text(`- Modelo:`, 25, yPos);
-      doc.setFont("helvetica", "normal");
-      doc.text(`${this.equipoSeleccionado.modelo || 'N/A'}`, 48, yPos);
-      yPos += 7;
-
-      doc.setFont("helvetica", "bold");
-      doc.text(`- Serie / ID:`, 25, yPos);
-      doc.setFont("helvetica", "normal");
-      doc.text(`${this.equipoSeleccionado.identificador}`, 52, yPos);
-      yPos += 15;
-
-      doc.setFont("helvetica", "bold");
-      doc.text('Cédula de Identidad del Receptor:', 20, yPos);
-      yPos += 5;
-
-      // Inserción de la imagen forzada a JPEG
       doc.addImage(base64Image, 'JPEG', 45, yPos, 120, 80);
 
       const nombreArchivo = `${this.equipoSeleccionado.identificador}_${Date.now()}.pdf`;
-
-      console.log('3. Descargando copia local...');
       doc.save(nombreArchivo);
 
-      console.log('4. Extrayendo Base64 nativo...');
-      // Obtenemos directamente el formato data URI y le cortamos la cabecera para Firebase
       const dataUrl = doc.output('datauristring');
       const pdfBase64 = dataUrl.split(',')[1];
 
-      console.log('5. Subiendo a Firebase Storage (Nativo)...');
-      const coleccion = this.equipoSeleccionado.categoria === 'Hardware' ? 'hardware' : 'software';
       const actaUrl = await this.dbService.subirActaPDF(pdfBase64, nombreArchivo);
+      const destinoGATI = { nombre: nombreFuncionario, area: areaFuncionario, rut: this.funcionarioSeleccionado.rut || '' };
+      await this.dbService.asignarActivo('hardware', this.equipoSeleccionado.id, destinoGATI, actaUrl);
 
-      console.log('6. Guardando asignación en Base de Datos...');
-      const destinoGATI = {
-        nombre: nombreFuncionario,
-        area: areaFuncionario,
-        rut: this.funcionarioSeleccionado.rut || ''
-      };
-      await this.dbService.asignarActivo(coleccion, this.equipoSeleccionado.id, destinoGATI, actaUrl);
-
-      console.log('7. ¡Éxito Total!');
       this.cerrarModalAsignar();
-      this.mostrarMensaje('Acta PDF generada y guardada exitosamente', 'success');
+      this.mostrarMensaje('Acta generada y guardada exitosamente', 'success');
       this.cargarInventario();
 
     } catch (error: any) {
-      console.error('Error general capturado:', error);
-      const errorMsg = error?.message || 'Error desconocido';
-      this.mostrarMensaje('Ocurrió un error: ' + errorMsg, 'danger');
+      this.mostrarMensaje('Ocurrió un error: ' + (error?.message || 'Desconocido'), 'danger');
     } finally {
       this.isSaving = false;
       this.cdr.detectChanges();
-      event.target.value = '';
+      if(event.target) event.target.value = '';
     }
   }
 
-  // --- LÓGICA DE DEVOLUCIÓN (Copia exacta a la asignación que ya funciona) ---
   async procesarFotoDevolucion(event: any) {
     const file = event.target.files[0];
     if (!file || !this.equipoParaDevolver) return;
@@ -340,13 +402,12 @@ export class InventarioPage {
     this.cdr.detectChanges();
 
     try {
-      console.log('1. Formateando imagen para devolución...');
+      this.mostrarMensaje('Generando acta de devolución...', 'warning');
       const base64Image = await this.formatearImagenParaPDF(file);
 
       const nombreFuncionario = item.asignadoA_nombre || 'Sin Nombre';
       const areaFuncionario = item.asignadoA_area || 'Sin Área';
 
-      console.log('2. Generando PDF de devolución...');
       const doc = new jsPDF();
       doc.setFontSize(16); doc.setFont("helvetica", "bold");
       doc.text('ACTA DE DEVOLUCIÓN DE EQUIPAMIENTO - GATI', 105, 20, { align: 'center' });
@@ -362,45 +423,31 @@ export class InventarioPage {
 
       doc.setFont("helvetica", "bold"); doc.text(`- Tipo de Activo:`, 25, yPos);
       doc.setFont("helvetica", "normal"); doc.text(`${item.tipo || item.categoria}`, 65, yPos); yPos += 7;
-
       doc.setFont("helvetica", "bold"); doc.text(`- Marca:`, 25, yPos);
       doc.setFont("helvetica", "normal"); doc.text(`${item.marca || 'N/A'}`, 45, yPos); yPos += 7;
-
       doc.setFont("helvetica", "bold"); doc.text(`- Modelo:`, 25, yPos);
       doc.setFont("helvetica", "normal"); doc.text(`${item.modelo || 'N/A'}`, 48, yPos); yPos += 7;
-
       doc.setFont("helvetica", "bold"); doc.text(`- Serie / ID:`, 25, yPos);
       doc.setFont("helvetica", "normal"); doc.text(`${item.identificador}`, 52, yPos); yPos += 15;
-
       doc.setFont("helvetica", "bold"); doc.text('Cédula de Identidad de quien entrega:', 20, yPos); yPos += 5;
 
       doc.addImage(base64Image, 'JPEG', 45, yPos, 120, 80);
 
       const nombreArchivo = `DEVOLUCION_${item.identificador}_${Date.now()}.pdf`;
-
-      console.log('3. Descargando copia local...');
       doc.save(nombreArchivo);
 
-      console.log('4. Extrayendo Base64 nativo...');
       const dataUrl = doc.output('datauristring');
       const pdfBase64 = dataUrl.split(',')[1];
-      const coleccion = item.categoria === 'Hardware' ? 'hardware' : 'software';
 
-      console.log('5. Subiendo a Firebase Storage (Nativo)...');
       const actaUrl = await this.dbService.subirActaPDF(pdfBase64, nombreArchivo);
+      await this.dbService.desvincularActivo('hardware', item.id, nombreFuncionario, areaFuncionario, actaUrl);
 
-      console.log('6. Guardando desvinculación en Base de Datos...');
-      await this.dbService.desvincularActivo(coleccion, item.id, nombreFuncionario, areaFuncionario, actaUrl);
-
-      console.log('7. ¡Éxito Total en la Devolución!');
       this.cerrarModalDevolver();
       this.mostrarMensaje('Equipo devuelto y acta guardada exitosamente', 'success');
       this.cargarInventario();
 
     } catch (error: any) {
-      console.error('Error general capturado en devolución:', error);
-      const errorMsg = error?.message || 'Error desconocido';
-      this.mostrarMensaje('Ocurrió un error: ' + errorMsg, 'danger');
+      this.mostrarMensaje('Error en la devolución: ' + (error?.message || 'Desconocido'), 'danger');
     } finally {
       this.isSaving = false;
       this.equipoParaDevolver = null;
@@ -416,18 +463,13 @@ export class InventarioPage {
       inputs: [
         { type: 'radio', label: 'Falla Irreparable', value: 'Falla Irreparable' },
         { type: 'radio', label: 'Obsolescencia Técnica', value: 'Obsolescencia Técnica' },
-        { type: 'radio', label: 'Robo o Pérdida', value: 'Robo o Pérdida' },
-        { type: 'radio', label: 'Término de Vida Útil', value: 'Término de Vida Útil' }
+        { type: 'radio', label: 'Robo o Pérdida', value: 'Robo o Pérdida' }
       ],
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        { text: 'Confirmar Baja', role: 'destructive', handler: async (motivoSeleccionado) => {
-            if (!motivoSeleccionado) {
-              this.mostrarMensaje('Debe seleccionar un motivo para auditoría', 'warning');
-              return false;
-            }
-            const coleccion = item.categoria === 'Hardware' ? 'hardware' : 'software';
-            await this.dbService.darDeBajaActivo(coleccion, item.id, motivoSeleccionado);
+        { text: 'Confirmar Baja', role: 'destructive', handler: async (motivo) => {
+            if (!motivo) return false;
+            await this.dbService.darDeBajaActivo('hardware', item.id, motivo);
             this.mostrarMensaje('Activo dado de baja correctamente', 'success');
             this.cargarInventario();
             return true;
@@ -438,67 +480,42 @@ export class InventarioPage {
     await alert.present();
   }
 
-  setModalOpen(isOpen: boolean) {
-    this.isModalOpen = isOpen;
-    if (!isOpen) this.equipoForm.reset({ estado: 'En Inventario' });
-  }
-
-  async guardarEquipo() {
-    if (this.equipoForm.invalid) return this.equipoForm.markAllAsTouched();
-    this.isSaving = true;
-    try {
-      await this.dbService.registrarHardware(this.equipoForm.value);
-      this.mostrarMensaje('Equipo registrado exitosamente.', 'success');
-      this.setModalOpen(false);
-      this.cargarInventario();
-    } catch (error) {
-      this.mostrarMensaje('Error al guardar.', 'danger');
-    } finally {
-      this.isSaving = false;
-    }
-  }
-
-  async onLogout() {
-    const alert = await this.alertController.create({
-      header: 'Cerrar Sesión', message: '¿Deseas salir del sistema?', buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        { text: 'Sí, salir', handler: async () => { await signOut(this.auth); this.router.navigate(['/login']); } }
-      ]
-    });
-    await alert.present();
-  }
-
-  async mostrarMensaje(mensaje: string, color: string) {
-    const toast = await this.toastCtrl.create({ message: mensaje, duration: 2500, position: 'top', color: color });
-    await toast.present();
-  }
-
   calcularObsolescencia(equipo: any) {
-    let fechaBase = new Date();
-    if (equipo.fechaIngreso) fechaBase = equipo.fechaIngreso.toDate ? equipo.fechaIngreso.toDate() : new Date(equipo.fechaIngreso);
+    if (!equipo.fechaIngreso) return;
+
+    let fechaBase = equipo.fechaIngreso.toDate ? equipo.fechaIngreso.toDate() : new Date(equipo.fechaIngreso);
     const fechaMuerte = new Date(fechaBase);
-    fechaMuerte.setFullYear(fechaMuerte.getFullYear() + 6);
     const hoy = new Date();
-    const mesesRestantes = (fechaMuerte.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
 
-    if (mesesRestantes <= 0) { this.mensajeObsolescencia = 'ALERTA: Equipo obsoleto (Superó los 6 años).'; this.colorObsolescencia = 'danger'; }
-    else if (mesesRestantes <= 12) { this.mensajeObsolescencia = `Atención: Quedan ${Math.floor(mesesRestantes)} meses de vida útil.`; this.colorObsolescencia = 'warning'; }
-    else { this.mensajeObsolescencia = `Vida útil restante: aprox. ${Math.floor(mesesRestantes / 12)} años.`; this.colorObsolescencia = 'success'; }
-  }
+    if (equipo.categoria === 'Licencia') {
+      fechaMuerte.setFullYear(fechaMuerte.getFullYear() + 1);
+      const diasRestantes = Math.ceil((fechaMuerte.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
 
-  abrirModalAsignar(equipo: any) {
-    this.equipoSeleccionado = equipo;
-    this.areaSeleccionada = '';
-    this.funcionarioSeleccionado = null;
-    this.funcionariosFiltrados = [];
-    this.calcularObsolescencia(equipo);
-    this.isAsignarModalOpen = true;
-    this.cdr.detectChanges();
+      if (diasRestantes <= 0) {
+        this.mensajeObsolescencia = 'ALERTA: El contrato de este software ha caducado.';
+        this.colorObsolescencia = 'danger';
+      }
+      else if (diasRestantes <= 30) {
+        this.mensajeObsolescencia = `Atención: El contrato debe renovarse en ${diasRestantes} días.`;
+        this.colorObsolescencia = 'warning';
+      }
+      else {
+        this.mensajeObsolescencia = `Contrato anual vigente (Vence en ${diasRestantes} días).`;
+        this.colorObsolescencia = 'success';
+      }
+    } else {
+      fechaMuerte.setFullYear(fechaMuerte.getFullYear() + 6);
+      const mesesRestantes = (fechaMuerte.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+
+      if (mesesRestantes <= 0) { this.mensajeObsolescencia = 'ALERTA: Equipo obsoleto (Superó 6 años).'; this.colorObsolescencia = 'danger'; }
+      else if (mesesRestantes <= 12) { this.mensajeObsolescencia = `Quedan ${Math.floor(mesesRestantes)} meses de vida útil.`; this.colorObsolescencia = 'warning'; }
+      else { this.mensajeObsolescencia = `Vida útil restante: ${Math.floor(mesesRestantes / 12)} años.`; this.colorObsolescencia = 'success'; }
+    }
   }
 
   async abrirModalHistorial(equipo: any) {
     this.equipoParaHistorial = equipo;
-    const coleccion = equipo.categoria === 'Hardware' ? 'hardware' : 'software';
+    const coleccion = equipo.categoria === 'Hardware' ? 'hardware' : 'licencias_software';
     this.historialActivo = await this.dbService.obtenerHistorialActivo(coleccion, equipo.id);
     this.isHistorialModalOpen = true;
     this.cdr.detectChanges();
@@ -509,4 +526,9 @@ export class InventarioPage {
     this.equipoParaHistorial = null;
     this.historialActivo = [];
   }
+
+  setModalOpen(isOpen: boolean) { this.isModalOpen = isOpen; }
+  async onLogout() { await signOut(this.auth); this.router.navigate(['/login']); }
+  async mostrarMensaje(mensaje: string, color: string) { const toast = await this.toastCtrl.create({ message: mensaje, duration: 2500, position: 'top', color: color }); await toast.present(); }
+  guardarEquipo() {}
 }

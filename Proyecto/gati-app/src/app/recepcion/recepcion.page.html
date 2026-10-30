@@ -13,7 +13,7 @@
 <ion-content [fullscreen]="true" class="ion-padding background-light">
   <div class="welcome-section">
     <h1 class="main-title">Recepción Inteligente</h1>
-    <p class="subtitle">Consulta la Orden de Compra para iniciar el escaneo físico.</p>
+    <p class="subtitle">Consulta la Orden de Compra para iniciar el ingreso físico o digital.</p>
   </div>
 
   <ion-card class="search-card">
@@ -49,7 +49,7 @@
 
     <ion-card-content>
       <ion-list>
-        <ion-list-header><ion-label>Artículos a Recepcionar (Toca uno para escanear)</ion-label></ion-list-header>
+        <ion-list-header><ion-label>Artículos a Recepcionar (Toca uno para ingresar)</ion-label></ion-list-header>
 
         <ion-item button *ngFor="let item of ordenData.articulos"
                   class="article-item"
@@ -63,11 +63,9 @@
           </ion-icon>
 
           <ion-label>
-            <!-- Título normal si no está completo -->
             <h2 *ngIf="item.cantidadRecibida < item.cantidadTotal" style="font-weight: 600;">
               {{ item.tipo }} {{ item.marca }} {{ item.modelo }}
             </h2>
-            <!-- Título TACHADO y en gris si está completo -->
             <h2 *ngIf="item.cantidadRecibida >= item.cantidadTotal" style="color: #999;">
               <s>{{ item.tipo }} {{ item.marca }} {{ item.modelo }}</s>
             </h2>
@@ -84,27 +82,31 @@
       </ion-list>
 
       <ion-text color="medium" class="ion-text-center ion-padding" *ngIf="!articuloSeleccionado">
-        <p><small>👆 Toca un artículo de la lista de arriba para activar el escáner.</small></p>
+        <p><small>👆 Toca un artículo de la lista de arriba para activar la recepción.</small></p>
       </ion-text>
 
       <div *ngIf="modoEscaneo && articuloSeleccionado" class="ion-margin-top scanner-box">
         <ion-text color="tertiary">
           <h3 style="margin: 0 0 10px 0; font-weight: 600; font-size: 1rem;">
-            Escaneando: {{ articuloSeleccionado.tipo }} {{ articuloSeleccionado.marca }}
+            Ingresando: {{ articuloSeleccionado.tipo }} {{ articuloSeleccionado.marca }}
           </h3>
         </ion-text>
 
+        <!-- CAJA DINÁMICA: HARDWARE (Uno por uno) VS SOFTWARE (Lote completo) -->
         <ion-item lines="none" class="search-item">
           <ion-icon name="barcode-outline" slot="start" color="primary"></ion-icon>
           <ion-input
-            placeholder="Simular lectura (Ej: SN-9988)..."
+            [placeholder]="articuloSeleccionado.tipo === 'Licencia' ? 'ID de Contrato (Ej: ADOBE-2026)...' : 'Escanea Número de Serie (Ej: SN-9988)...'"
             [(ngModel)]="codigoEscaneado"
             (keyup.enter)="procesarEscaneo()">
           </ion-input>
-          <ion-button slot="end" (click)="procesarEscaneo()" color="primary">Leer</ion-button>
+          <ion-button slot="end" (click)="procesarEscaneo()" color="primary">
+            {{ articuloSeleccionado.tipo === 'Licencia' ? 'Guardar Lote (' + articuloSeleccionado.cantidadTotal + ')' : 'Leer' }}
+          </ion-button>
         </ion-item>
 
-        <div class="ion-text-center ion-margin-top">
+        <!-- Cámara solo disponible para hardware -->
+        <div class="ion-text-center ion-margin-top" *ngIf="articuloSeleccionado.tipo !== 'Licencia'">
           <input type="file" #fileInput (change)="leerImagen($event)" accept="image/*" style="display: none;">
           <ion-button fill="outline" color="secondary" (click)="fileInput.click()">
             <ion-icon name="image-outline" slot="start"></ion-icon>
