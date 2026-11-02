@@ -37,7 +37,7 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+
 
 /* ================================================================= */
 /* BLINDAJE CONTRA MODO OSCURO EN CAMPOS DE TEXTO                    */
@@ -51,4 +51,39 @@ ion-input, ion-select, ion-searchbar, ion-textarea {
 /* Asegurar que las etiquetas flotantes también mantengan color oscuro */
 ion-input.label-floating, ion-select.label-floating {
   --label-color: #666666 !important;
+}
+
+/* ================================================================= */
+/* DESTRUCCIÓN TOTAL DEL MODO OSCURO (FORZAR TEMA CLARO GLOBAL)      */
+/* ================================================================= */
+@media (prefers-color-scheme: dark) {
+  :root, body {
+    /* Forzar fondos claros */
+    --ion-background-color: #f4f6f9 !important;
+    --ion-card-background: #ffffff !important;
+    --ion-item-background: #ffffff !important;
+
+    /* Forzar textos oscuros */
+    --ion-text-color: #333333 !important;
+    --ion-text-color-rgb: 51,51,51 !important;
+
+    /* Forzar barras y menús claros */
+    --ion-toolbar-background: #ffffff !important;
+    --ion-tab-bar-background: #ffffff !important;
+  }
+
+  /* Blindaje específico para componentes rebeldes como el Menú Lateral */
+  ion-content {
+    --background: #f4f6f9 !important;
+  }
+
+  ion-menu, ion-card, ion-item, ion-list {
+    --background: #ffffff !important;
+    color: #333333 !important;
+  }
+
+  /* Forzar que los textos dentro del menú lateral sean visibles */
+  ion-menu ion-label, ion-menu ion-icon {
+    color: #333333 !important;
+  }
 }
