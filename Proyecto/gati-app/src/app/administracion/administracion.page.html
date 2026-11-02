@@ -1,19 +1,15 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
-
     <!-- AQUÍ FORZAMOS LA APARICIÓN DEL MENÚ LATERAL -->
-   <ion-buttons slot="start">
+    <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-
     <ion-title>Administración GATI</ion-title>
-
     <ion-buttons slot="end">
       <ion-button (click)="onLogout()" title="Cerrar Sesión">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
-
   </ion-toolbar>
 </ion-header>
 
@@ -34,30 +30,60 @@
     </ion-segment-button>
   </ion-segment>
 
-  <!-- VISTA 1: FUNCIONARIOS -->
+  <!-- ============================================== -->
+  <!-- VISTA 1: FUNCIONARIOS                          -->
+  <!-- ============================================== -->
   <div *ngIf="viewMode === 'funcionarios'">
-    <ion-card class="table-card">
-      <ion-card-content class="table-container">
-        <table class="custom-table">
-          <thead>
-            <tr><th>RUT</th><th>Nombre Completo</th><th>Área / Unidad</th><th>Cargo</th><th>Correo</th></tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let f of listaFuncionarios">
-              <td><strong>{{ f.rut }}</strong></td>
-              <td>{{ f.nombreCompleto }}</td>
-              <td>{{ f.area }}</td>
-              <td>{{ f.cargo }}</td>
-              <td>{{ f.correo }}</td>
-            </tr>
-            <tr *ngIf="listaFuncionarios.length === 0">
-              <td colspan="5" class="ion-text-center">No hay funcionarios registrados.</td>
-            </tr>
-          </tbody>
-        </table>
-      </ion-card-content>
-    </ion-card>
 
+    <!-- ESCRITORIO: TABLA FUNCIONARIOS -->
+    <div class="ion-hide-lg-down">
+      <ion-card class="table-card">
+        <ion-card-content class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr><th>RUT</th><th>Nombre Completo</th><th>Área / Unidad</th><th>Cargo</th><th>Correo</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let f of listaFuncionarios">
+                <td><strong>{{ f.rut }}</strong></td>
+                <td>{{ f.nombreCompleto }}</td>
+                <td>{{ f.area }}</td>
+                <td>{{ f.cargo }}</td>
+                <td>{{ f.correo }}</td>
+              </tr>
+              <tr *ngIf="listaFuncionarios.length === 0">
+                <td colspan="5" class="ion-text-center">No hay funcionarios registrados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- MÓVIL: TARJETAS FUNCIONARIOS -->
+    <div class="ion-hide-lg-up">
+      <ion-card *ngFor="let f of listaFuncionarios" class="shadow-sm ion-margin-bottom mobile-item-card">
+        <ion-item lines="full" color="light">
+          <ion-icon name="person-outline" slot="start" color="primary"></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h2 style="font-weight: 700; color: #333;">{{ f.nombreCompleto }}</h2>
+            <p style="font-size: 0.85rem;">RUT: {{ f.rut }}</p>
+          </ion-label>
+        </ion-item>
+        <ion-card-content>
+          <p style="margin-bottom: 5px;"><strong style="color: #333;">Área:</strong> {{ f.area }}</p>
+          <p style="margin-bottom: 5px;"><strong style="color: #333;">Cargo:</strong> {{ f.cargo }}</p>
+          <p style="margin-bottom: 0px; font-size: 0.85rem; color: #888;">
+            <ion-icon name="mail-outline"></ion-icon> {{ f.correo }}
+          </p>
+        </ion-card-content>
+      </ion-card>
+      <ion-card *ngIf="listaFuncionarios.length === 0" class="shadow-sm">
+        <ion-card-content class="ion-text-center">No hay funcionarios registrados.</ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- BOTÓN NUEVO FUNCIONARIO -->
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button color="primary" class="fab-extendido" (click)="setModalFuncionario(true)">
         <ion-icon name="add"></ion-icon>
@@ -66,41 +92,68 @@
     </ion-fab>
   </div>
 
- <!-- VISTA 2: USUARIOS DEL SISTEMA -->
+  <!-- ============================================== -->
+  <!-- VISTA 2: USUARIOS DEL SISTEMA                  -->
+  <!-- ============================================== -->
   <div *ngIf="viewMode === 'usuarios'">
-    <ion-card class="table-card">
-      <ion-card-content class="table-container">
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Correo Electrónico</th>
-              <th>Rol de Acceso</th>
-              <th>Estado de Cuenta</th>
-              <th style="width: 100px; text-align: center;">Acciones</th> <!-- NUEVA COLUMNA -->
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let u of listaUsuarios">
-              <!-- El texto se vuelve gris si el usuario está inactivo -->
-              <td><strong [style.color]="u.estado === 'Activo' ? '#333' : '#999'">{{ u.correo }}</strong></td>
-              <td><ion-badge color="tertiary" [style.opacity]="u.estado === 'Activo' ? 1 : 0.5">{{ u.rol }}</ion-badge></td>
-              <td><ion-badge [color]="u.estado === 'Activo' ? 'success' : 'danger'">{{ u.estado }}</ion-badge></td>
 
-              <!-- NUEVO BOTÓN DE ACCIONES -->
-              <td style="text-align: center;">
-                <ion-button fill="clear" color="medium" (click)="abrirOpcionesUsuario(u)">
-                  <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
-                </ion-button>
-              </td>
-            </tr>
-            <tr *ngIf="listaUsuarios.length === 0">
-              <td colspan="4" class="ion-text-center">No hay usuarios del sistema registrados.</td>
-            </tr>
-          </tbody>
-        </table>
-      </ion-card-content>
-    </ion-card>
+    <!-- ESCRITORIO: TABLA USUARIOS -->
+    <div class="ion-hide-lg-down">
+      <ion-card class="table-card">
+        <ion-card-content class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Correo Electrónico</th>
+                <th>Rol de Acceso</th>
+                <th>Estado de Cuenta</th>
+                <th style="width: 100px; text-align: center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of listaUsuarios">
+                <td><strong [style.color]="u.estado === 'Activo' ? '#333' : '#999'">{{ u.correo }}</strong></td>
+                <td><ion-badge color="tertiary" [style.opacity]="u.estado === 'Activo' ? 1 : 0.5">{{ u.rol }}</ion-badge></td>
+                <td><ion-badge [color]="u.estado === 'Activo' ? 'success' : 'danger'">{{ u.estado }}</ion-badge></td>
+                <td style="text-align: center;">
+                  <ion-button fill="clear" color="medium" (click)="abrirOpcionesUsuario(u)">
+                    <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+                  </ion-button>
+                </td>
+              </tr>
+              <tr *ngIf="listaUsuarios.length === 0">
+                <td colspan="4" class="ion-text-center">No hay usuarios del sistema registrados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
+    <!-- MÓVIL: TARJETAS USUARIOS -->
+    <div class="ion-hide-lg-up">
+      <ion-card *ngFor="let u of listaUsuarios" class="shadow-sm ion-margin-bottom mobile-item-card">
+        <ion-item lines="full" color="light">
+          <ion-icon name="id-card-outline" slot="start" [color]="u.estado === 'Activo' ? 'secondary' : 'medium'"></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <h2 style="font-weight: 700;" [style.color]="u.estado === 'Activo' ? '#333' : '#999'">{{ u.correo }}</h2>
+            <p style="font-size: 0.85rem;"><ion-badge color="tertiary" [style.opacity]="u.estado === 'Activo' ? 1 : 0.5">{{ u.rol }}</ion-badge></p>
+          </ion-label>
+          <ion-button fill="clear" slot="end" color="dark" (click)="abrirOpcionesUsuario(u)">
+            <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+          </ion-button>
+        </ion-item>
+        <ion-card-content>
+          <strong style="color: #333;">Estado del Acceso:</strong><br>
+          <ion-badge [color]="u.estado === 'Activo' ? 'success' : 'danger'" class="ion-margin-top">{{ u.estado }}</ion-badge>
+        </ion-card-content>
+      </ion-card>
+      <ion-card *ngIf="listaUsuarios.length === 0" class="shadow-sm">
+        <ion-card-content class="ion-text-center">No hay usuarios del sistema registrados.</ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- BOTÓN NUEVO USUARIO -->
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button color="secondary" class="fab-extendido" (click)="setModalUsuario(true)">
         <ion-icon name="add"></ion-icon>
@@ -118,12 +171,11 @@
           <ion-buttons slot="end"><ion-button (click)="setModalFuncionario(false)"><ion-icon name="close-outline"></ion-icon></ion-button></ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
+      <ion-content class="ion-padding background-light">
         <form [formGroup]="funcionarioForm" (ngSubmit)="guardarFuncionario()">
           <ion-item class="custom-input"><ion-input label="RUT *" labelPlacement="floating" formControlName="rut" placeholder="Ej: 12.345.678-9"></ion-input></ion-item>
           <ion-item class="custom-input"><ion-input label="Nombre Completo *" labelPlacement="floating" formControlName="nombreCompleto"></ion-input></ion-item>
           <ion-item class="custom-input"><ion-input label="Correo *" labelPlacement="floating" type="email" formControlName="correo"></ion-input></ion-item>
-
           <ion-item class="custom-input">
             <ion-select label="Área / Unidad *" labelPlacement="floating" formControlName="area">
               <ion-select-option value="Dirección General">Dirección General</ion-select-option>
@@ -132,9 +184,7 @@
               <ion-select-option value="Recursos Humanos">Recursos Humanos</ion-select-option>
             </ion-select>
           </ion-item>
-
           <ion-item class="custom-input"><ion-input label="Cargo *" labelPlacement="floating" formControlName="cargo"></ion-input></ion-item>
-
           <ion-button type="submit" expand="block" shape="round" color="primary" class="ion-margin-top" [disabled]="isSaving">Guardar Funcionario</ion-button>
         </form>
       </ion-content>
@@ -150,7 +200,7 @@
           <ion-buttons slot="end"><ion-button (click)="setModalUsuario(false)"><ion-icon name="close-outline"></ion-icon></ion-button></ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
+      <ion-content class="ion-padding background-light">
         <p class="ion-text-center ion-margin-bottom">Se enviará una invitación a este correo para que el técnico configure su contraseña segura.</p>
         <form [formGroup]="usuarioForm" (ngSubmit)="guardarUsuario()">
           <ion-item class="custom-input"><ion-input label="Correo Institucional *" labelPlacement="floating" type="email" formControlName="correo"></ion-input></ion-item>

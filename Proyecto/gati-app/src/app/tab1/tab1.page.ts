@@ -6,11 +6,16 @@ import { FormsModule } from '@angular/forms';
 import {
   AlertController, ToastController, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButton, IonButtons, IonIcon, IonGrid, IonRow, IonCol,
-  IonCard, IonCardContent, IonSegment, IonSegmentButton, IonLabel, IonMenuButton, IonCardHeader, IonCardTitle
+  IonCard, IonCardContent, IonSegment, IonSegmentButton, IonLabel, IonMenuButton,
+  IonCardHeader, IonCardTitle,
+  IonItem, IonBadge // <-- AQUÍ AGREGAMOS LOS ELEMENTOS FALTANTES
 } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
-import { logOutOutline, desktopOutline, checkmarkCircleOutline, timeOutline, closeCircleOutline } from 'ionicons/icons';
+import {
+  logOutOutline, desktopOutline, checkmarkCircleOutline, timeOutline, closeCircleOutline,
+  warningOutline, documentTextOutline, codeSlashOutline // <-- AQUÍ ESTÁN LOS NUEVOS ÍCONOS
+} from 'ionicons/icons';
 
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartOptions, ChartData } from 'chart.js';
@@ -26,7 +31,9 @@ import { ApiService } from '../services/api.service';
   imports: [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
     IonButton, IonButtons, IonIcon, IonGrid, IonRow, IonCol,
-    IonCard, IonCardContent, IonSegment, IonSegmentButton, IonLabel, IonMenuButton, IonCardHeader, IonCardTitle,
+    IonCard, IonCardContent, IonSegment, IonSegmentButton, IonLabel, IonMenuButton,
+    IonCardHeader, IonCardTitle,
+    IonItem, IonBadge, // <-- AQUÍ LOS INYECTAMOS EN EL COMPONENTE
     BaseChartDirective
   ],
 })
@@ -56,8 +63,6 @@ export class Tab1Page {
   private router = inject(Router);
   private toastController = inject(ToastController);
   private alertController = inject(AlertController);
-
-  // Inyectamos el ChangeDetectorRef que recordaste
   private cdr = inject(ChangeDetectorRef);
 
   hardwareStats = { total: 0, asignados: 0, inventario: 0, baja: 0 };
@@ -79,7 +84,11 @@ export class Tab1Page {
   contratosVigentes: any[] = [];
 
   constructor() {
-    addIcons({ logOutOutline, desktopOutline, checkmarkCircleOutline, timeOutline, closeCircleOutline });
+    // AQUÍ REGISTRAMOS LOS ÍCONOS DE FORMA SEGURA
+    addIcons({
+      logOutOutline, desktopOutline, checkmarkCircleOutline, timeOutline, closeCircleOutline,
+      warningOutline, documentTextOutline, codeSlashOutline
+    });
   }
 
   async ionViewWillEnter() {
@@ -120,10 +129,8 @@ export class Tab1Page {
     this.procesarSoftware(software);
     this.procesarOrdenes(ordenesExternas, hardware, software);
 
-    // EL PARCHE INFALIBLE: Forzamos a Angular a construir el HTML con los datos
     this.cdr.detectChanges();
 
-    // EL TRUCO DEL F12: Una vez que el HTML existe, repintamos los gráficos
     setTimeout(() => {
       this.actualizarGraficos();
       window.dispatchEvent(new Event('resize'));
@@ -170,7 +177,7 @@ export class Tab1Page {
     this.softwareStats = { total: 0, asignados: 0, inventario: 0, baja: 0 };
     const conteoMarcas: any = {};
     const conteoAnual: any = {};
-    this.contratosVigentes = []; // Limpiamos el arreglo
+    this.contratosVigentes = [];
 
     const hoy = new Date();
     const añoActual = hoy.getFullYear();
@@ -194,7 +201,6 @@ export class Tab1Page {
         const año = fIngreso.getFullYear();
         conteoAnual[año] = (conteoAnual[año] || 0) + total;
 
-        // NUEVA LÓGICA: Llenar la tabla SOLO con contratos del año actual
         if (año === añoActual) {
           const diasRestantes = Math.ceil((fVence.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
           let estadoContrato = 'Vigente';
@@ -218,7 +224,6 @@ export class Tab1Page {
       conteoMarcas[marca] = (conteoMarcas[marca] || 0) + total;
     });
 
-    // Ordenar para que los contratos que vencen primero salgan arriba
     this.contratosVigentes.sort((a, b) => a.fechaVencimiento.getTime() - b.fechaVencimiento.getTime());
 
     this.swDonutData = { ...this.swDonutData, labels: Object.keys(conteoMarcas), datasets: [{ ...this.swDonutData.datasets[0], data: Object.values(conteoMarcas) }] };

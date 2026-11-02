@@ -178,32 +178,44 @@ export class InventarioPage {
     this.cdr.detectChanges();
   }
 
-  async abrirOpciones(item: any) {
+ async abrirOpciones(item: any) {
     const botones = [];
 
     if (item.categoria === 'Hardware') {
       if (item.estado === 'En Inventario') {
-        botones.push({ text: 'Asignar a Funcionario', icon: 'person-add-outline', handler: () => { setTimeout(() => this.abrirModalAsignar(item), 150); } });
+        botones.push({ text: 'Asignar a Funcionario', icon: 'person-add-outline', data: 'asignar' });
       }
       if (item.estado === 'Asignado') {
-        botones.push({ text: 'Desvincular (Devolver a bodega)', icon: 'return-down-back-outline', handler: () => { this.abrirModalDevolver(item); } });
+        botones.push({ text: 'Desvincular (Devolver)', icon: 'return-down-back-outline', data: 'devolver' });
       }
       if (item.estado !== 'De Baja') {
-        botones.push({ text: 'Dar de Baja (Retirar)', icon: 'trash-outline', role: 'destructive', handler: () => this.confirmarBaja(item) });
+        botones.push({ text: 'Dar de Baja (Retirar)', icon: 'trash-outline', role: 'destructive', data: 'baja' });
       }
     } else {
-      // Bloqueamos la asignación si el contrato está vencido
       if (item.cantidadDisponible > 0 && !item.estaVencida) {
-        botones.push({ text: 'Asignar Licencia', icon: 'person-add-outline', handler: () => { this.abrirModalAsignarLicencia(item); } });
+        botones.push({ text: 'Asignar Licencia', icon: 'person-add-outline', data: 'asignarLicencia' });
       }
-      botones.push({ text: 'Ver Personal Asignado', icon: 'people-outline', handler: () => { this.abrirModalVerAsignados(item); } });
+      botones.push({ text: 'Ver Personal Asignado', icon: 'people-outline', data: 'verAsignados' });
     }
 
-    botones.push({ text: 'Ver Historial', icon: 'time-outline', handler: () => { setTimeout(() => this.abrirModalHistorial(item), 150); } });
+    botones.push({ text: 'Ver Historial', icon: 'time-outline', data: 'historial' });
     botones.push({ text: 'Cancelar', icon: 'close-outline', role: 'cancel' });
 
     const actionSheet = await this.actionSheetCtrl.create({ header: `Opciones: ${item.identificador}`, buttons: botones });
     await actionSheet.present();
+
+    // MAGIA AQUÍ: Esperamos a que el menú desaparezca totalmente de la pantalla
+    const { data } = await actionSheet.onDidDismiss();
+
+    // Recién ahora, abrimos el modal correspondiente de forma segura
+    if (data) {
+      if (data === 'asignar') this.abrirModalAsignar(item);
+      else if (data === 'devolver') this.abrirModalDevolver(item);
+      else if (data === 'baja') this.confirmarBaja(item);
+      else if (data === 'asignarLicencia') this.abrirModalAsignarLicencia(item);
+      else if (data === 'verAsignados') this.abrirModalVerAsignados(item);
+      else if (data === 'historial') this.abrirModalHistorial(item);
+    }
   }
 
   alSeleccionarArea() {

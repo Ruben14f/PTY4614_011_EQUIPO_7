@@ -147,4 +147,39 @@
     letter-spacing: 0.3px;
   }
 
+  /* ========================================= */
+/* LÓGICA RESPONSIVA PARA TABLAS Y TARJETAS  */
+/* ========================================= */
+
+/* Por defecto en PC: Muestra la tabla, Oculta los móviles */
+.desktop-view {
+  display: block;
+}
+.mobile-view {
+  display: none;
+}
+.mobile-item-card {
+  border-radius: 12px;
+}
+
+/* ========================================= */
+/* LÓGICA RESPONSIVA ESTRICTA                */
+/* ========================================= */
+
+.mobile-item-card {
+  border-radius: 12px;
+}
+
+/* Para pantallas de celular y tablets (0px a 992px) */
+@media screen and (max-width: 992px) {
+  .desktop-view {
+    display: none !important;
+  }
+  .mobile-view {
+    display: block !important;
+  }
+}
+
+
+
 }

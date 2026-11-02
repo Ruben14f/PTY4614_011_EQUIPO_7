@@ -69,7 +69,6 @@
             <h2 *ngIf="item.cantidadRecibida >= item.cantidadTotal" style="color: #999;">
               <s>{{ item.tipo }} {{ item.marca }} {{ item.modelo }}</s>
             </h2>
-
             <p [style.color]="item.cantidadRecibida >= item.cantidadTotal ? '#28ba62' : ''">
               {{ item.cantidadRecibida >= item.cantidadTotal ? 'Recepción completa' : 'Progreso de escaneo:' }}
             </p>
@@ -92,7 +91,6 @@
           </h3>
         </ion-text>
 
-        <!-- CAJA DINÁMICA: HARDWARE (Uno por uno) VS SOFTWARE (Lote completo) -->
         <ion-item lines="none" class="search-item">
           <ion-icon name="barcode-outline" slot="start" color="primary"></ion-icon>
           <ion-input
@@ -101,16 +99,25 @@
             (keyup.enter)="procesarEscaneo()">
           </ion-input>
           <ion-button slot="end" (click)="procesarEscaneo()" color="primary">
-            {{ articuloSeleccionado.tipo === 'Licencia' ? 'Guardar Lote (' + articuloSeleccionado.cantidadTotal + ')' : 'Leer' }}
+            {{ articuloSeleccionado.tipo === 'Licencia' ? 'Guardar (' + articuloSeleccionado.cantidadTotal + ')' : 'Leer' }}
           </ion-button>
         </ion-item>
 
-        <!-- Cámara solo disponible para hardware -->
+        <!-- ESCÁNER EN TIEMPO REAL RESPONSIVO -->
         <div class="ion-text-center ion-margin-top" *ngIf="articuloSeleccionado.tipo !== 'Licencia'">
-          <input type="file" #fileInput (change)="leerImagen($event)" accept="image/*" style="display: none;">
-          <ion-button fill="outline" color="secondary" (click)="fileInput.click()">
-            <ion-icon name="image-outline" slot="start"></ion-icon>
-            Subir Imagen con Código
+
+          <div *ngIf="isScanning" style="width: 100%; max-width: 350px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <div id="reader"></div>
+          </div>
+
+          <ion-button *ngIf="!isScanning" fill="outline" color="secondary" (click)="iniciarEscaner()" class="ion-margin-top">
+            <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+            Escanear en Tiempo Real
+          </ion-button>
+
+          <ion-button *ngIf="isScanning" fill="solid" color="danger" (click)="detenerEscaner()" class="ion-margin-top">
+            <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+            Detener Cámara
           </ion-button>
         </div>
       </div>

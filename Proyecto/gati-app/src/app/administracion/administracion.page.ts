@@ -9,14 +9,14 @@ import {
   IonCard, IonCardContent, IonItem, IonInput, IonSelect, IonSelectOption,
   IonButton, IonIcon, IonSegment, IonSegmentButton,
   IonLabel, IonBadge, IonFab, IonFabButton, IonModal, ToastController, AlertController,
-  ActionSheetController // <-- Añadido
+  ActionSheetController
 } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
 import {
   logOutOutline, add, closeOutline, peopleOutline, shieldCheckmarkOutline,
-  briefcaseOutline, personOutline, mailOutline, idCardOutline, ellipsisVertical, // <-- Añadido
-  swapVerticalOutline, powerOutline // <-- Añadidos
+  briefcaseOutline, personOutline, mailOutline, idCardOutline, ellipsisVertical,
+  swapVerticalOutline, powerOutline
 } from 'ionicons/icons';
 
 import { DatabaseService } from '../services/database.service';
@@ -53,7 +53,7 @@ export class AdministracionPage {
   private toastCtrl = inject(ToastController);
   private alertController = inject(AlertController);
   private cdr = inject(ChangeDetectorRef);
-  private actionSheetCtrl = inject(ActionSheetController); // <-- Añadido
+  private actionSheetCtrl = inject(ActionSheetController);
 
   constructor(private fb: FormBuilder) {
     addIcons({
@@ -132,9 +132,8 @@ export class AdministracionPage {
     }
   }
 
-  // --- NUEVA LÓGICA: GESTIÓN DE USUARIOS ---
+  // --- LÓGICA CON ANIMACIÓN CORREGIDA (onDidDismiss) ---
   async abrirOpcionesUsuario(usuario: any) {
-    // 1. Evitar que el admin activo se cambie de rol a sí mismo (y pierda acceso)
     const currentEmail = this.auth.currentUser?.email;
     if (usuario.correo === currentEmail) {
       this.mostrarMensaje('No puedes modificar tu propia cuenta activa por seguridad.', 'warning');
@@ -143,39 +142,14 @@ export class AdministracionPage {
 
     const botones = [];
 
-    // 2. Opción para cambiar de rol (Técnico <-> Administrador)
     if (usuario.estado === 'Activo') {
       const nuevoRol = usuario.rol === 'Administrador' ? 'Técnico' : 'Administrador';
-      botones.push({
-        text: `Convertir en ${nuevoRol}`,
-        icon: 'swap-vertical-outline',
-        handler: () => {
-          this.cambiarRolUsuario(usuario, nuevoRol);
-        }
-      });
-    }
-
-    // 3. Opción para dar de baja o reactivar
-    if (usuario.estado === 'Activo') {
-      botones.push({
-        text: 'Desactivar / Dar de Baja',
-        icon: 'power-outline',
-        role: 'destructive',
-        handler: () => {
-          this.cambiarEstadoUsuario(usuario, 'Inactivo');
-        }
-      });
+      botones.push({ text: `Convertir en ${nuevoRol}`, icon: 'swap-vertical-outline', data: { accion: 'rol', valor: nuevoRol } });
+      botones.push({ text: 'Desactivar / Dar de Baja', icon: 'power-outline', role: 'destructive', data: { accion: 'estado', valor: 'Inactivo' } });
     } else {
-      botones.push({
-        text: 'Reactivar Cuenta',
-        icon: 'power-outline',
-        handler: () => {
-          this.cambiarEstadoUsuario(usuario, 'Activo');
-        }
-      });
+      botones.push({ text: 'Reactivar Cuenta', icon: 'power-outline', data: { accion: 'estado', valor: 'Activo' } });
     }
 
-    // 4. Botón de cancelar
     botones.push({ text: 'Cancelar', icon: 'close-outline', role: 'cancel' });
 
     const actionSheet = await this.actionSheetCtrl.create({
@@ -184,24 +158,47 @@ export class AdministracionPage {
     });
 
     await actionSheet.present();
+
+    // Esperamos a que la hoja se cierre completamente para evitar congelamiento
+    const { data } = await actionSheet.onDidDismiss();
+
+    if (data) {
+      if (data.accion === 'rol') {
+        this.cambiarRolUsuario(usuario, data.valor);
+      } else if (data.accion === 'estado') {
+        this.cambiarEstadoUsuario(usuario, data.valor);
+      }
+    }
   }
 
-  async cambiarRolUsuario(usuario: any, nuevoRol: string) {
+async cambiarRolUsuario(usuario: any, nuevoRol: string) {
     try {
       await this.dbService.actualizarRolUsuario(usuario.id, nuevoRol);
+
+      // 1. Actualizamos el dato localmente en la memoria de la pantalla
+      usuario.rol = nuevoRol;
+
       this.mostrarMensaje(`Rol actualizado a ${nuevoRol} exitosamente.`, 'success');
-      this.cargarDatos();
+
+      // 2. Le decimos a Angular que refresque la vista al instante
+      this.cdr.detectChanges();
     } catch (error) {
       this.mostrarMensaje('Error al cambiar el rol.', 'danger');
     }
   }
 
-  async cambiarEstadoUsuario(usuario: any, nuevoEstado: string) {
+ async cambiarEstadoUsuario(usuario: any, nuevoEstado: string) {
     try {
       await this.dbService.actualizarEstadoUsuario(usuario.id, nuevoEstado);
+
+      // 1. Actualizamos el estado localmente
+      usuario.estado = nuevoEstado;
+
       const colorMsg = nuevoEstado === 'Activo' ? 'success' : 'warning';
       this.mostrarMensaje(`El usuario ahora está ${nuevoEstado}.`, colorMsg);
-      this.cargarDatos();
+
+      // 2. Forzamos la actualización visual
+      this.cdr.detectChanges();
     } catch (error) {
       this.mostrarMensaje('Error al cambiar el estado.', 'danger');
     }

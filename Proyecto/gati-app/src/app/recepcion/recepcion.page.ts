@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,10 +18,11 @@ import { addIcons } from 'ionicons';
 import {
   searchOutline, alertCircleOutline, documentTextOutline,
   cubeOutline, qrCodeOutline, barcodeOutline,
-  checkmarkCircle, alertCircle, imageOutline, logOutOutline
+  checkmarkCircle, alertCircle, imageOutline, logOutOutline, closeCircleOutline
 } from 'ionicons/icons';
 
-import { BrowserMultiFormatReader } from '@zxing/browser';
+// Nueva librería multiplataforma para tiempo real
+import { Html5Qrcode } from 'html5-qrcode';
 
 @Component({
   selector: 'app-recepcion',
@@ -36,7 +37,7 @@ import { BrowserMultiFormatReader } from '@zxing/browser';
     IonList, IonListHeader, IonLabel, IonBadge
   ]
 })
-export class RecepcionPage {
+export class RecepcionPage implements OnDestroy {
   numeroOC: string = '';
   ordenData: any = null;
   isLoading: boolean = false;
@@ -48,6 +49,10 @@ export class RecepcionPage {
 
   equiposRecibidos: any[] = [];
   licenciasRecibidas: any[] = [];
+
+  // Variables del nuevo escáner
+  isScanning: boolean = false;
+  private html5QrCode: Html5Qrcode | null = null;
 
   private apiService = inject(ApiService);
   private databaseService = inject(DatabaseService);
@@ -61,13 +66,18 @@ export class RecepcionPage {
     addIcons({
       searchOutline, alertCircleOutline, documentTextOutline,
       cubeOutline, qrCodeOutline, barcodeOutline,
-      checkmarkCircle, alertCircle, imageOutline, logOutOutline
+      checkmarkCircle, alertCircle, imageOutline, logOutOutline, closeCircleOutline
     });
+  }
+
+  ngOnDestroy() {
+    this.detenerEscaner();
   }
 
   async buscarOrden() {
     if (!this.numeroOC.trim()) return;
 
+    await this.detenerEscaner();
     this.isLoading = true;
     this.errorMessage = '';
     this.ordenData = null;
@@ -77,7 +87,6 @@ export class RecepcionPage {
 
     try {
       const ocFormateada = this.numeroOC.trim().toUpperCase();
-
       const dataBruta = await this.apiService.consultarOC(ocFormateada);
       this.equiposRecibidos = await this.databaseService.obtenerEquiposPorOC(ocFormateada);
       this.licenciasRecibidas = await this.databaseService.obtenerLicenciasPorOC(ocFormateada);
@@ -86,13 +95,11 @@ export class RecepcionPage {
 
       dataFresca.articulos.forEach((articulo: any) => {
         if (articulo.tipo === 'Licencia') {
-          // Para el software buscamos si el lote ya fue registrado
           const loteExiste = this.licenciasRecibidas.some((lic: any) =>
             lic.marca === articulo.marca && lic.modelo === articulo.modelo
           );
           articulo.cantidadRecibida = loteExiste ? articulo.cantidadTotal : 0;
         } else {
-          // Para el hardware contamos los equipos reales ingresados
           const cantidadReal = this.equiposRecibidos.filter((eq: any) =>
             eq.tipo === articulo.tipo && eq.marca === articulo.marca && eq.modelo === articulo.modelo
           ).length;
@@ -101,46 +108,73 @@ export class RecepcionPage {
       });
 
       this.ordenData = dataFresca;
-
     } catch (error: any) {
       this.errorMessage = error.message;
     } finally {
       this.isLoading = false;
-      setTimeout(() => {
-        this.cdr.detectChanges();
-      }, 50);
+      setTimeout(() => { this.cdr.detectChanges(); }, 50);
     }
   }
 
-  seleccionarArticulo(item: any) {
+  async seleccionarArticulo(item: any) {
     if (item.cantidadRecibida >= item.cantidadTotal) {
       this.mostrarMensaje('Este artículo ya está recepcionado al 100%', 'warning');
       return;
     }
+    await this.detenerEscaner();
     this.articuloSeleccionado = item;
     this.modoEscaneo = true;
     this.cdr.detectChanges();
   }
 
-  async leerImagen(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
+  // --- NUEVA LÓGICA DE ESCÁNER EN TIEMPO REAL ---
+  async iniciarEscaner() {
+    this.isScanning = true;
+    this.cdr.detectChanges();
 
-    try {
-      const imageUrl = URL.createObjectURL(file);
-      const codeReader = new BrowserMultiFormatReader();
-      const result = await codeReader.decodeFromImageUrl(imageUrl);
-
-      this.codigoEscaneado = result.getText();
-      this.mostrarMensaje('Código detectado en la imagen', 'success');
-      this.procesarEscaneo();
-
-    } catch (error) {
-      this.mostrarMensaje('No se detectó ningún código de barras o QR.', 'warning');
-    } finally {
-      event.target.value = '';
-    }
+    // Pequeña pausa para asegurar que el div "reader" ya existe en el HTML
+    setTimeout(async () => {
+      try {
+        this.html5QrCode = new Html5Qrcode("reader");
+        await this.html5QrCode.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 }
+          },
+          (decodedText) => {
+            // Éxito al leer
+            this.codigoEscaneado = decodedText;
+            this.detenerEscaner();
+            this.mostrarMensaje('Código detectado', 'success');
+            this.procesarEscaneo();
+          },
+          (errorMessage) => {
+            // Ignoramos los errores continuos de búsqueda de frames
+          }
+        );
+      } catch (err) {
+        console.error("Error al iniciar cámara", err);
+        this.mostrarMensaje('No se pudo acceder a la cámara. Revisa los permisos.', 'danger');
+        this.isScanning = false;
+        this.cdr.detectChanges();
+      }
+    }, 150);
   }
+
+  async detenerEscaner() {
+    if (this.html5QrCode && this.html5QrCode.isScanning) {
+      try {
+        await this.html5QrCode.stop();
+        this.html5QrCode.clear();
+      } catch (err) {
+        console.error("Error al detener el escáner", err);
+      }
+    }
+    this.isScanning = false;
+    this.cdr.detectChanges();
+  }
+  // ----------------------------------------------
 
   async procesarEscaneo() {
     if (!this.codigoEscaneado.trim() || !this.articuloSeleccionado) return;
@@ -148,7 +182,6 @@ export class RecepcionPage {
     const inputData = this.codigoEscaneado.trim().toUpperCase();
 
     try {
-      // 1. LÓGICA PARA SOFTWARE (LOTE)
       if (this.articuloSeleccionado.tipo === 'Licencia') {
         const existeContrato = await this.databaseService.verificarContratoExiste(inputData);
         if (existeContrato) {
@@ -158,7 +191,7 @@ export class RecepcionPage {
         }
 
         const nuevoLote = {
-          identificador: inputData, // Ejemplo: ADOBE-2026
+          identificador: inputData,
           categoria: 'Licencia',
           marca: this.articuloSeleccionado.marca,
           modelo: this.articuloSeleccionado.modelo,
@@ -170,11 +203,9 @@ export class RecepcionPage {
 
         await this.databaseService.registrarLicenciaLote(nuevoLote);
         this.licenciasRecibidas.push(nuevoLote);
-        this.articuloSeleccionado.cantidadRecibida = this.articuloSeleccionado.cantidadTotal; // Llena la barra completa
+        this.articuloSeleccionado.cantidadRecibida = this.articuloSeleccionado.cantidadTotal;
         this.mostrarMensaje(`Éxito: Lote de licencias ${this.articuloSeleccionado.marca} guardado.`, 'success');
       }
-
-      // 2. LÓGICA PARA HARDWARE (INDIVIDUAL)
       else {
         const existeGlobal = await this.databaseService.verificarSerieExiste(inputData);
         if (existeGlobal) {
@@ -215,11 +246,9 @@ export class RecepcionPage {
 
   async confirmarSalida(): Promise<boolean> {
     if (!this.ordenData) return true;
-
     const faltanArticulos = this.ordenData.articulos.some(
       (a: any) => a.cantidadRecibida < a.cantidadTotal
     );
-
     if (!faltanArticulos) return true;
 
     return new Promise(async (resolve) => {
@@ -228,7 +257,7 @@ export class RecepcionPage {
         message: 'Tienes una Orden en proceso. Si sales, la vista se limpiará.',
         buttons: [
           { text: 'Quedarme', role: 'cancel', handler: () => resolve(false) },
-          { text: 'Sí, salir', handler: () => resolve(true) }
+          { text: 'Sí, salir', handler: () => { this.detenerEscaner(); resolve(true); } }
         ]
       });
       await alert.present();
@@ -244,7 +273,7 @@ export class RecepcionPage {
       message: '¿Estás seguro de que deseas salir del sistema GATI?',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        { text: 'Sí, salir', handler: async () => { await signOut(this.auth); this.router.navigate(['/login']); } }
+        { text: 'Sí, salir', handler: async () => { await this.detenerEscaner(); await signOut(this.auth); this.router.navigate(['/login']); } }
       ]
     });
     await alert.present();

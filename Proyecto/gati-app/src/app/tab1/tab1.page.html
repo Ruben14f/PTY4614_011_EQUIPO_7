@@ -58,17 +58,18 @@
       </ion-col>
     </ion-row>
 
-    <!-- BLOQUE EXCLUSIVO PARA HARDWARE -->
+    <!-- ============================================== -->
+    <!-- BLOQUE EXCLUSIVO PARA HARDWARE                 -->
+    <!-- ============================================== -->
     @if (viewMode === 'hardware') {
       <ion-row>
-        <!-- Gráfico Dona -->
+        <!-- Gráficos Hardware -->
         <ion-col size="12" size-md="4">
           <ion-card class="chart-card">
             <ion-card-header><ion-card-title>Distribución por Tipo</ion-card-title></ion-card-header>
             <ion-card-content><div class="chart-container"><canvas baseChart [data]="hwDonutData" [options]="donutOptions" type="doughnut"></canvas></div></ion-card-content>
           </ion-card>
         </ion-col>
-        <!-- Gráfico Línea Histórica -->
         <ion-col size="12" size-md="8">
           <ion-card class="chart-card">
             <ion-card-header><ion-card-title>Volumen de Ingresos Histórico</ion-card-title></ion-card-header>
@@ -78,70 +79,117 @@
       </ion-row>
 
       <ion-row>
-        <!-- Obsolescencia (> 6 años) -->
+        <!-- 1. TABLA: Obsolescencia (> 6 años) -->
         <ion-col size="12" size-md="6">
           <ion-card class="table-card">
             <ion-card-header><ion-card-title>Alerta de Obsolescencia (> 6 años)</ion-card-title></ion-card-header>
             <ion-card-content>
-              <table class="custom-table">
-                <thead><tr><th>Serie</th><th>Equipo</th><th>Años</th></tr></thead>
-                <tbody>
-                  @for (item of obsoleteHardware; track item.serie) {
-                    <tr>
-                      <td>{{item.serie}}</td>
-                      <td>{{item.tipo}}</td>
-                      <td class="danger-text"><strong>{{item.anios}} años</strong></td>
+              <!-- VISTA ESCRITORIO -->
+              <div class="ion-hide-lg-down">
+                <table class="custom-table">
+                  <thead><tr><th>Serie</th><th>Equipo</th><th>Años</th></tr></thead>
+                  <tbody>
+                    @for (item of obsoleteHardware; track item.serie) {
+                      <tr>
+                        <td>{{item.serie}}</td>
+                        <td>{{item.tipo}}</td>
+                        <td class="danger-text"><strong>{{item.anios}} años</strong></td>
+                      </tr>
+                    }
+                    <tr *ngIf="obsoleteHardware.length === 0">
+                      <td colspan="3" class="ion-text-center" style="color: #888;">No hay equipos obsoletos registrados.</td>
                     </tr>
-                  }
-                  <tr *ngIf="obsoleteHardware.length === 0">
-                    <td colspan="3" class="ion-text-center" style="color: #888;">No hay equipos obsoletos registrados.</td>
-                  </tr>
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- VISTA MÓVIL -->
+              <div class="ion-hide-lg-up">
+                <ion-card *ngFor="let item of obsoleteHardware" class="shadow-sm ion-margin-bottom mobile-item-card" style="border-left: 4px solid #dc3545;">
+                  <ion-item lines="none">
+                    <ion-icon name="warning-outline" slot="start" color="danger"></ion-icon>
+                    <ion-label class="ion-text-wrap">
+                      <h2 style="font-weight: 700; color: #333;">{{item.serie}}</h2>
+                      <p style="font-size: 0.85rem;">{{item.tipo}}</p>
+                    </ion-label>
+                    <ion-badge slot="end" color="danger">{{item.anios}} años</ion-badge>
+                  </ion-item>
+                </ion-card>
+                <div *ngIf="obsoleteHardware.length === 0" class="ion-text-center" style="color: #888; padding: 10px;">
+                  No hay equipos obsoletos registrados.
+                </div>
+              </div>
             </ion-card-content>
           </ion-card>
         </ion-col>
 
-        <!-- Últimas Órdenes -->
+        <!-- 2. TABLA: Últimas Órdenes -->
         <ion-col size="12" size-md="6">
           <ion-card class="table-card">
             <ion-card-header><ion-card-title>Seguimiento de Órdenes de Compra</ion-card-title></ion-card-header>
             <ion-card-content>
-              <table class="custom-table">
-                <thead><tr><th>N° OC</th><th>Proveedor</th><th>Estado</th></tr></thead>
-                <tbody>
-                  @for (order of recentOrders; track order.oc) {
-                    <tr>
-                      <td>{{order.oc}}</td>
-                      <td>{{order.proveedor}}</td>
-                      <td>
-                        <span class="badge"
-                              [style.background]="order.estado === 'Completada' ? 'rgba(40, 167, 69, 0.1)' : (order.estado === 'Parcial' ? 'rgba(255, 193, 7, 0.1)' : 'rgba(220, 53, 69, 0.1)')"
-                              [style.color]="order.estado === 'Completada' ? '#28a745' : (order.estado === 'Parcial' ? '#ffc107' : '#dc3545')">
-                          {{order.estado}}
-                        </span>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+              <!-- VISTA ESCRITORIO -->
+              <div class="ion-hide-lg-down">
+                <table class="custom-table">
+                  <thead><tr><th>N° OC</th><th>Proveedor</th><th>Estado</th></tr></thead>
+                  <tbody>
+                    @for (order of recentOrders; track order.oc) {
+                      <tr>
+                        <td>{{order.oc}}</td>
+                        <td>{{order.proveedor}}</td>
+                        <td>
+                          <span class="badge"
+                                [style.background]="order.estado === 'Completada' ? 'rgba(40, 167, 69, 0.1)' : (order.estado === 'Parcial' ? 'rgba(255, 193, 7, 0.1)' : 'rgba(220, 53, 69, 0.1)')"
+                                [style.color]="order.estado === 'Completada' ? '#28a745' : (order.estado === 'Parcial' ? '#ffc107' : '#dc3545')">
+                            {{order.estado}}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- VISTA MÓVIL -->
+              <div class="ion-hide-lg-up">
+                <ion-card *ngFor="let order of recentOrders" class="shadow-sm ion-margin-bottom mobile-item-card">
+                  <ion-item lines="full" color="light">
+                    <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
+                    <ion-label class="ion-text-wrap">
+                      <h2 style="font-weight: 700; color: #333;">OC: {{order.oc}}</h2>
+                      <p style="font-size: 0.85rem;">{{order.proveedor}}</p>
+                    </ion-label>
+                  </ion-item>
+                  <ion-card-content class="ion-text-center">
+                    <span class="badge"
+                          [style.background]="order.estado === 'Completada' ? 'rgba(40, 167, 69, 0.1)' : (order.estado === 'Parcial' ? 'rgba(255, 193, 7, 0.1)' : 'rgba(220, 53, 69, 0.1)')"
+                          [style.color]="order.estado === 'Completada' ? '#28a745' : (order.estado === 'Parcial' ? '#ffc107' : '#dc3545')">
+                      Estado: {{order.estado}}
+                    </span>
+                  </ion-card-content>
+                </ion-card>
+                <div *ngIf="recentOrders.length === 0" class="ion-text-center" style="color: #888; padding: 10px;">
+                  No hay órdenes recientes.
+                </div>
+              </div>
             </ion-card-content>
           </ion-card>
         </ion-col>
       </ion-row>
     }
 
-    <!-- BLOQUE EXCLUSIVO PARA LICENCIAS -->
+    <!-- ============================================== -->
+    <!-- BLOQUE EXCLUSIVO PARA LICENCIAS                -->
+    <!-- ============================================== -->
     @else {
       <ion-row>
-        <!-- Gráfico Dona Licencias -->
+        <!-- Gráficos Licencias -->
         <ion-col size="12" size-md="4">
           <ion-card class="chart-card">
             <ion-card-header><ion-card-title>Licencias por Marca</ion-card-title></ion-card-header>
             <ion-card-content><div class="chart-container"><canvas baseChart [data]="swDonutData" [options]="donutOptions" type="doughnut"></canvas></div></ion-card-content>
           </ion-card>
         </ion-col>
-        <!-- Gráfico Línea Histórica Licencias -->
         <ion-col size="12" size-md="8">
           <ion-card class="chart-card">
             <ion-card-header><ion-card-title>Adquisición Anual de Software</ion-card-title></ion-card-header>
@@ -151,50 +199,84 @@
       </ion-row>
 
       <ion-row>
-        <!-- Estado de Contratos y Saturación (Solo Año en Curso) -->
+        <!-- 3. TABLA: Estado de Contratos y Saturación -->
         <ion-col size="12">
           <ion-card class="table-card">
             <ion-card-header><ion-card-title>Estado de Contratos y Saturación (2026)</ion-card-title></ion-card-header>
             <ion-card-content>
-              <table class="custom-table">
-                <thead>
-                  <tr>
-                    <th>Software / Lote</th>
-                    <th>Ocupación de Asientos</th>
-                    <th>Vencimiento</th>
-                    <th>Estado del Contrato</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (contrato of contratosVigentes; track contrato.oc) {
+              <!-- VISTA ESCRITORIO -->
+              <div class="ion-hide-lg-down">
+                <table class="custom-table">
+                  <thead>
                     <tr>
-                      <td>
-                        <strong>{{contrato.software}}</strong><br>
-                        <small style="color: #888;">OC: {{contrato.oc}}</small>
-                      </td>
-                      <td>
-                        <!-- Si supera el 90% de ocupación, se pone rojo advirtiendo que faltan asientos -->
-                        <span [class.danger-text]="contrato.porcentaje >= 90">
-                          {{contrato.ocupacionTexto}} ({{contrato.porcentaje}}%)
-                        </span>
-                      </td>
-                      <td>{{contrato.fechaVencimiento | date:'dd-MM-yyyy'}}</td>
-                      <td>
-                        <span class="badge"
-                              [style.background]="contrato.estado === 'Vigente' ? 'rgba(40, 167, 69, 0.1)' : (contrato.estado === 'Por Renovar' ? 'rgba(255, 193, 7, 0.1)' : 'rgba(220, 53, 69, 0.1)')"
-                              [style.color]="contrato.estado === 'Vigente' ? '#28a745' : (contrato.estado === 'Por Renovar' ? '#ffc107' : '#dc3545')">
-                          {{contrato.estado}}
-                        </span>
+                      <th>Software / Lote</th>
+                      <th>Ocupación de Asientos</th>
+                      <th>Vencimiento</th>
+                      <th>Estado del Contrato</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (contrato of contratosVigentes; track contrato.oc) {
+                      <tr>
+                        <td>
+                          <strong>{{contrato.software}}</strong><br>
+                          <small style="color: #888;">OC: {{contrato.oc}}</small>
+                        </td>
+                        <td>
+                          <span [class.danger-text]="contrato.porcentaje >= 90">
+                            {{contrato.ocupacionTexto}} ({{contrato.porcentaje}}%)
+                          </span>
+                        </td>
+                        <td>{{contrato.fechaVencimiento | date:'dd-MM-yyyy'}}</td>
+                        <td>
+                          <span class="badge"
+                                [style.background]="contrato.estado === 'Vigente' ? 'rgba(40, 167, 69, 0.1)' : (contrato.estado === 'Por Renovar' ? 'rgba(255, 193, 7, 0.1)' : 'rgba(220, 53, 69, 0.1)')"
+                                [style.color]="contrato.estado === 'Vigente' ? '#28a745' : (contrato.estado === 'Por Renovar' ? '#ffc107' : '#dc3545')">
+                            {{contrato.estado}}
+                          </span>
+                        </td>
+                      </tr>
+                    }
+                    <tr *ngIf="contratosVigentes.length === 0">
+                      <td colspan="4" class="ion-text-center" style="color: #888; padding: 20px;">
+                        No hay contratos de licencias registrados para el año en curso.
                       </td>
                     </tr>
-                  }
-                  <tr *ngIf="contratosVigentes.length === 0">
-                    <td colspan="4" class="ion-text-center" style="color: #888; padding: 20px;">
-                      No hay contratos de licencias registrados para el año en curso.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- VISTA MÓVIL -->
+              <div class="ion-hide-lg-up">
+                <ion-card *ngFor="let contrato of contratosVigentes" class="shadow-sm ion-margin-bottom mobile-item-card">
+                  <ion-item lines="full" color="light">
+                    <ion-icon name="code-slash-outline" slot="start" color="tertiary"></ion-icon>
+                    <ion-label class="ion-text-wrap">
+                      <h2 style="font-weight: 700; color: #333;">{{contrato.software}}</h2>
+                      <p style="font-size: 0.85rem;">OC: {{contrato.oc}}</p>
+                    </ion-label>
+                  </ion-item>
+                  <ion-card-content>
+                    <p style="margin-bottom: 8px;">
+                      <strong style="color: #333;">Ocupación:</strong>
+                      <span [class.danger-text]="contrato.porcentaje >= 90">
+                        {{contrato.ocupacionTexto}} ({{contrato.porcentaje}}%)
+                      </span>
+                    </p>
+                    <p style="margin-bottom: 12px;">
+                      <strong style="color: #333;">Vencimiento:</strong> {{contrato.fechaVencimiento | date:'dd-MM-yyyy'}}
+                    </p>
+                    <span class="badge"
+                          [style.background]="contrato.estado === 'Vigente' ? 'rgba(40, 167, 69, 0.1)' : (contrato.estado === 'Por Renovar' ? 'rgba(255, 193, 7, 0.1)' : 'rgba(220, 53, 69, 0.1)')"
+                          [style.color]="contrato.estado === 'Vigente' ? '#28a745' : (contrato.estado === 'Por Renovar' ? '#ffc107' : '#dc3545')">
+                      {{contrato.estado}}
+                    </span>
+                  </ion-card-content>
+                </ion-card>
+                <div *ngIf="contratosVigentes.length === 0" class="ion-text-center" style="color: #888; padding: 20px;">
+                  No hay contratos de licencias registrados para el año en curso.
+                </div>
+              </div>
             </ion-card-content>
           </ion-card>
         </ion-col>
