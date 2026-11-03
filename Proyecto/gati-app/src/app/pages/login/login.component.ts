@@ -4,7 +4,9 @@ import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 
 import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from '@angular/fire/auth';
-import { IonContent, IonInput, IonButton, ToastController } from '@ionic/angular';
+import { IonContent, IonInput, IonButton, ToastController, IonIcon } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 
 import { DatabaseService } from '../../services/database.service';
 
@@ -15,13 +17,14 @@ import { DatabaseService } from '../../services/database.service';
   standalone: true,
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
-    IonContent, IonInput, IonButton
+    IonContent, IonInput, IonButton, IonIcon
   ]
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   isRegisterMode: boolean = false;
   isLoading: boolean = false;
+  verClave: boolean = false; // <-- Controla si la clave se ve o no
 
   private dbService = inject(DatabaseService);
 
@@ -31,6 +34,7 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private toastController: ToastController
   ) {
+    addIcons({ eyeOutline, eyeOffOutline }); // <-- Registra los íconos del ojo
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       // Volvemos al validador básico para que deje pasar tu contraseña "123456" en el Login
@@ -40,13 +44,19 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {}
 
+  // --- Función para mostrar/ocultar contraseña ---
+  toggleClave() {
+    this.verClave = !this.verClave;
+  }
+
   toggleMode() {
     this.isRegisterMode = !this.isRegisterMode;
     this.loginForm.reset();
   }
 
   async recuperarContrasena() {
-    const email = this.loginForm.get('email')?.value;
+    // Convertimos a minúsculas en caso de que lo escriban en mayúscula
+    const email = this.loginForm.get('email')?.value?.toLowerCase().trim();
 
     if (!email) {
       this.mostrarMensaje('Por favor, escribe tu correo en el formulario primero.', 'warning');
@@ -75,7 +85,9 @@ export class LoginComponent implements OnInit {
       document.activeElement.blur();
     }
 
-    const { email, password } = this.loginForm.value;
+    // --- NUEVA LÓGICA: Transformar a minúsculas y quitar espacios ---
+    const email = this.loginForm.value.email.toLowerCase().trim();
+    const password = this.loginForm.value.password;
 
     // --- NUEVA LÓGICA: Validación estricta SOLO en Registro ---
     if (this.isRegisterMode) {

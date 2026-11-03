@@ -175,7 +175,7 @@
         <form [formGroup]="funcionarioForm" (ngSubmit)="guardarFuncionario()">
           <ion-item class="custom-input"><ion-input label="RUT *" labelPlacement="floating" formControlName="rut" placeholder="Ej: 12.345.678-9"></ion-input></ion-item>
           <ion-item class="custom-input"><ion-input label="Nombre Completo *" labelPlacement="floating" formControlName="nombreCompleto"></ion-input></ion-item>
-          <ion-item class="custom-input"><ion-input label="Correo *" labelPlacement="floating" type="email" formControlName="correo"></ion-input></ion-item>
+          <ion-item class="custom-input"><ion-input label="Correo *" labelPlacement="floating" type="email" formControlName="correo" autocapitalize="none"></ion-input></ion-item>
           <ion-item class="custom-input">
             <ion-select label="Área / Unidad *" labelPlacement="floating" formControlName="area">
               <ion-select-option value="Dirección General">Dirección General</ion-select-option>
@@ -203,7 +203,7 @@
       <ion-content class="ion-padding background-light">
         <p class="ion-text-center ion-margin-bottom">Se enviará una invitación a este correo para que el técnico configure su contraseña segura.</p>
         <form [formGroup]="usuarioForm" (ngSubmit)="guardarUsuario()">
-          <ion-item class="custom-input"><ion-input label="Correo Institucional *" labelPlacement="floating" type="email" formControlName="correo"></ion-input></ion-item>
+          <ion-item class="custom-input"><ion-input label="Correo Institucional *" labelPlacement="floating" type="email" formControlName="correo" autocapitalize="none"></ion-input></ion-item>
           <ion-item class="custom-input">
             <ion-select label="Nivel de Acceso *" labelPlacement="floating" formControlName="rol">
               <ion-select-option value="Administrador">Administrador</ion-select-option>

@@ -97,7 +97,13 @@ export class AdministracionPage {
     this.isSaving = true;
 
     try {
-      await this.dbService.registrarFuncionario(this.funcionarioForm.value);
+      // Aplicamos toLowerCase y trim al correo antes de guardarlo
+      const nuevoFuncionario = {
+        ...this.funcionarioForm.value,
+        correo: this.funcionarioForm.value.correo.toLowerCase().trim()
+      };
+
+      await this.dbService.registrarFuncionario(nuevoFuncionario);
       this.mostrarMensaje('Funcionario registrado exitosamente.', 'success');
       this.setModalFuncionario(false);
       this.cargarDatos();
@@ -118,7 +124,12 @@ export class AdministracionPage {
     this.isSaving = true;
 
     try {
-      const nuevoUsuario = this.usuarioForm.value;
+      // Aplicamos toLowerCase y trim al correo antes de guardarlo
+      const nuevoUsuario = {
+        ...this.usuarioForm.value,
+        correo: this.usuarioForm.value.correo.toLowerCase().trim()
+      };
+
       await this.dbService.registrarUsuarioSistema(nuevoUsuario);
 
       this.mostrarMensaje(`Se ha autorizado a ${nuevoUsuario.correo} para registrarse.`, 'success');

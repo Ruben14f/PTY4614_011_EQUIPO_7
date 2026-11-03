@@ -15,6 +15,7 @@
 
           <ion-input
             type="email"
+            autocapitalize="none"
             fill="outline"
             label="Correo Electrónico"
             labelPlacement="floating"
@@ -23,12 +24,16 @@
           </ion-input>
 
           <ion-input
-            type="password"
+            [type]="verClave ? 'text' : 'password'"
             fill="outline"
             label="Contraseña"
             labelPlacement="floating"
             formControlName="password"
             class="ion-margin-bottom custom-input">
+            <!-- BOTÓN DEL OJITO DE CONTRASEÑA -->
+            <ion-button fill="clear" slot="end" (click)="toggleClave()">
+              <ion-icon slot="icon-only" [name]="verClave ? 'eye-off-outline' : 'eye-outline'" style="color: #666;"></ion-icon>
+            </ion-button>
           </ion-input>
 
           <!-- NUEVO ENLACE: OLVIDÉ MI CONTRASEÑA -->
