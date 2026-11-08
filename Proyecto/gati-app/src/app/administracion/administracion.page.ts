@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth, signOut } from '@angular/fire/auth';
+import emailjs from '@emailjs/browser';
 
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonMenuButton,
@@ -16,7 +17,7 @@ import { addIcons } from 'ionicons';
 import {
   logOutOutline, add, closeOutline, peopleOutline, shieldCheckmarkOutline,
   briefcaseOutline, personOutline, mailOutline, idCardOutline, ellipsisVertical,
-  swapVerticalOutline, powerOutline
+  swapVerticalOutline, powerOutline, trashOutline
 } from 'ionicons/icons';
 
 import { DatabaseService } from '../services/database.service';
@@ -59,7 +60,7 @@ export class AdministracionPage {
     addIcons({
       logOutOutline, add, closeOutline, peopleOutline, shieldCheckmarkOutline,
       briefcaseOutline, personOutline, mailOutline, idCardOutline, ellipsisVertical,
-      swapVerticalOutline, powerOutline
+      swapVerticalOutline, powerOutline, trashOutline
     });
 
     this.funcionarioForm = this.fb.group({
@@ -92,6 +93,32 @@ export class AdministracionPage {
     if (!isOpen) this.funcionarioForm.reset();
   }
 
+  // --- NUEVO: FORMATEADOR DE RUT EN TIEMPO REAL ---
+  formatearRut(event: any) {
+    // 1. Quitamos todo lo que no sea número o la letra K (mayúscula o minúscula)
+    let valor = event.target.value.replace(/[^0-9kK]/g, '');
+
+    if (valor.length > 1) {
+      // 2. Separamos el cuerpo del dígito verificador
+      let cuerpo = valor.slice(0, -1);
+      let dv = valor.slice(-1).toUpperCase(); // Forzamos la K a mayúscula
+
+      // 3. Le agregamos los puntos al cuerpo cada 3 dígitos
+      cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+      // 4. Unimos todo con el guion
+      const rutFormateado = `${cuerpo}-${dv}`;
+
+      // 5. Actualizamos el formulario y la vista en tiempo real
+      this.funcionarioForm.patchValue({ rut: rutFormateado }, { emitEvent: false });
+      event.target.value = rutFormateado;
+    } else {
+      // Si solo ha escrito 1 número, lo dejamos tal cual
+      this.funcionarioForm.patchValue({ rut: valor }, { emitEvent: false });
+      event.target.value = valor;
+    }
+  }
+
   async guardarFuncionario() {
     if (this.funcionarioForm.invalid) return this.funcionarioForm.markAllAsTouched();
     this.isSaving = true;
@@ -119,7 +146,7 @@ export class AdministracionPage {
     if (!isOpen) this.usuarioForm.reset({ rol: 'Técnico', estado: 'Activo' });
   }
 
-  async guardarUsuario() {
+async guardarUsuario() {
     if (this.usuarioForm.invalid) return this.usuarioForm.markAllAsTouched();
     this.isSaving = true;
 
@@ -130,9 +157,27 @@ export class AdministracionPage {
         correo: this.usuarioForm.value.correo.toLowerCase().trim()
       };
 
+      // 1. Guardamos la autorización en la Base de Datos (Firestore)
       await this.dbService.registrarUsuarioSistema(nuevoUsuario);
 
-      this.mostrarMensaje(`Se ha autorizado a ${nuevoUsuario.correo} para registrarse.`, 'success');
+      // 2. Enviamos el correo de invitación por EmailJS
+      try {
+        await emailjs.send(
+          'service_xu4p6bf',       // Tu Service ID
+          'template_ok01sni',      // Tu Template ID
+          {
+            to_email: nuevoUsuario.correo,
+            rol: nuevoUsuario.rol,
+            link_acceso: 'https://gati-mop.web.app/login'
+          },
+          '84dnCsFctzHBhcZBA'      // Tu Public Key
+        );
+        this.mostrarMensaje(`Se ha autorizado e invitado a ${nuevoUsuario.correo}.`, 'success');
+      } catch (emailError) {
+        console.warn('Fallo el envío de EmailJS:', emailError);
+        this.mostrarMensaje(`Usuario creado, pero no se pudo enviar el correo de invitación.`, 'warning');
+      }
+
       this.setModalUsuario(false);
       this.cargarDatos();
     } catch (error) {
@@ -140,6 +185,41 @@ export class AdministracionPage {
       console.error(error);
     } finally {
       this.isSaving = false;
+    }
+  }
+
+  async abrirOpcionesFuncionario(funcionario: any) {
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: `Gestionar: ${funcionario.nombreCompleto}`,
+      buttons: [
+        { text: 'Eliminar Funcionario', icon: 'trash-outline', role: 'destructive', data: 'eliminar' },
+        { text: 'Cancelar', icon: 'close-outline', role: 'cancel' }
+      ]
+    });
+    await actionSheet.present();
+    const { data } = await actionSheet.onDidDismiss();
+
+    if (data === 'eliminar') {
+      const alert = await this.alertController.create({
+        header: 'Confirmar Eliminación',
+        message: `¿Estás seguro que deseas eliminar a ${funcionario.nombreCompleto} de la base de datos?`,
+        buttons: [
+          { text: 'Cancelar', role: 'cancel' },
+          {
+            text: 'Eliminar', role: 'destructive',
+            handler: async () => {
+              try {
+                await this.dbService.eliminarFuncionario(funcionario.id);
+                this.mostrarMensaje('Funcionario eliminado correctamente.', 'success');
+                this.cargarDatos();
+              } catch (error) {
+                this.mostrarMensaje('Error al eliminar.', 'danger');
+              }
+            }
+          }
+        ]
+      });
+      await alert.present();
     }
   }
 
@@ -160,6 +240,8 @@ export class AdministracionPage {
     } else {
       botones.push({ text: 'Reactivar Cuenta', icon: 'power-outline', data: { accion: 'estado', valor: 'Activo' } });
     }
+    // Agrega este botón a la lista
+    botones.push({ text: 'Eliminar Definitivamente', icon: 'trash-outline', role: 'destructive', data: { accion: 'eliminar' } });
 
     botones.push({ text: 'Cancelar', icon: 'close-outline', role: 'cancel' });
 
@@ -178,8 +260,33 @@ export class AdministracionPage {
         this.cambiarRolUsuario(usuario, data.valor);
       } else if (data.accion === 'estado') {
         this.cambiarEstadoUsuario(usuario, data.valor);
+      } else if (data.accion === 'eliminar') { // <-- NUEVO
+        this.eliminarUsuarioFisicamente(usuario);
       }
     }
+  }
+
+  async eliminarUsuarioFisicamente(usuario: any) {
+    const alert = await this.alertController.create({
+      header: 'Confirmar Eliminación',
+      message: `Esto borrará de la base de datos a ${usuario.correo}. ¿Continuar?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar', role: 'destructive',
+          handler: async () => {
+            try {
+              await this.dbService.eliminarUsuarioSistema(usuario.id);
+              this.mostrarMensaje('Usuario eliminado correctamente.', 'success');
+              this.cargarDatos();
+            } catch (error) {
+              this.mostrarMensaje('Error al eliminar.', 'danger');
+            }
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
 async cambiarRolUsuario(usuario: any, nuevoRol: string) {

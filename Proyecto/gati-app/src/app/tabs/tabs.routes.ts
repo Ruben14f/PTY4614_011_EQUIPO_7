@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { adminGuard } from '../guards/admin-guard'; // <-- 1. IMPORTAMOS EL GUARDIA
 
 export const routes: Routes = [
   {
@@ -21,7 +22,8 @@ export const routes: Routes = [
       },
       {
         path: 'administracion',
-        loadComponent: () => import('../administracion/administracion.page').then(m => m.AdministracionPage)
+        loadComponent: () => import('../administracion/administracion.page').then(m => m.AdministracionPage),
+        canActivate: [adminGuard] // <-- 2. PROTEGEMOS ESTA RUTA ESPECÍFICA
       },
       {
         path: '',

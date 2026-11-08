@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, updateDoc, orderBy, increment, arrayUnion, arrayRemove } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, updateDoc, orderBy, increment, arrayUnion, arrayRemove, deleteDoc } from '@angular/fire/firestore';
 import { FirebaseApp } from '@angular/fire/app';
 import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { Auth } from '@angular/fire/auth';
@@ -372,6 +372,27 @@ export class DatabaseService {
       await updateDoc(usuarioRef, { estado: nuevoEstado });
     } catch (error) {
       console.error('Error al actualizar estado:', error);
+      throw error;
+    }
+  }
+
+  // --- FUNCIONES PARA ELIMINAR DE LA BASE DE DATOS ---
+  async eliminarFuncionario(id: string): Promise<void> {
+    try {
+      const docRef = doc(this.firestore, `funcionarios/${id}`);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error('Error al eliminar funcionario:', error);
+      throw error;
+    }
+  }
+
+  async eliminarUsuarioSistema(id: string): Promise<void> {
+    try {
+      const docRef = doc(this.firestore, `usuarios_sistema/${id}`);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error('Error al eliminar usuario:', error);
       throw error;
     }
   }

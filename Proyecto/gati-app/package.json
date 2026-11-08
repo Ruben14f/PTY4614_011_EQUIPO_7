@@ -26,6 +26,7 @@
     "@capacitor/haptics": "8.0.2",
     "@capacitor/keyboard": "8.0.5",
     "@capacitor/status-bar": "8.0.3",
+    "@emailjs/browser": "^5.0.3",
     "@ionic/angular": "^9.0.5",
     "@zxing/browser": "^0.2.1",
     "@zxing/library": "^0.23.0",
