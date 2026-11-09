@@ -60,6 +60,10 @@ export class InventarioPage {
   isVerAsignadosModalOpen: boolean = false;
   licenciaParaVer: any = null;
 
+  // Filtro específico para el modal de usuarios
+  textoBusquedaModal: string = '';
+  usuariosAsignadosFiltrados: any[] = [];
+
   inventarioCompleto: any[] = [];
   inventarioFiltrado: any[] = [];
   filtroCategoria: string = 'todos';
@@ -139,7 +143,7 @@ export class InventarioPage {
         cantidadDisponible: s.cantidadDisponible !== undefined ? s.cantidadDisponible : (s.cantidadTotal || 0),
         asignados: s.asignados || [],
         fechaVencimientoCalculada: fechaVence,
-        estaVencida: estaVencida, // NUEVO INDICADOR DE CADUCIDAD
+        estaVencida: estaVencida,
         ocAsociada: s.ocAsociada || s.numeroOC
       };
     });
@@ -156,12 +160,9 @@ export class InventarioPage {
     if (this.filtroEstado && this.filtroEstado.length > 0 && !this.filtroEstado.includes('Todos')) {
       temp = temp.filter(item => {
         if (item.categoria === 'Hardware') return this.filtroEstado.includes(item.estado);
-
-        // Filtros actualizados para Software considerando la caducidad
         if (this.filtroEstado.includes('De Baja') && item.estaVencida) return true;
         if (this.filtroEstado.includes('En Inventario') && item.cantidadDisponible > 0 && !item.estaVencida) return true;
         if (this.filtroEstado.includes('Asignado') && item.cantidadDisponible === 0 && !item.estaVencida) return true;
-
         return false;
       });
     }
@@ -170,15 +171,14 @@ export class InventarioPage {
       const termino = this.textoBusqueda.toLowerCase();
       temp = temp.filter(item =>
         (item.identificador && item.identificador.toLowerCase().includes(termino)) ||
-        (item.descripcion && item.descripcion.toLowerCase().includes(termino)) ||
-        (item.asignadoA_nombre && item.asignadoA_nombre.toLowerCase().includes(termino))
+        (item.descripcion && item.descripcion.toLowerCase().includes(termino))
       );
     }
     this.inventarioFiltrado = temp;
     this.cdr.detectChanges();
   }
 
- async abrirOpciones(item: any) {
+  async abrirOpciones(item: any) {
     const botones = [];
 
     if (item.categoria === 'Hardware') {
@@ -204,10 +204,8 @@ export class InventarioPage {
     const actionSheet = await this.actionSheetCtrl.create({ header: `Opciones: ${item.identificador}`, buttons: botones });
     await actionSheet.present();
 
-    // MAGIA AQUÍ: Esperamos a que el menú desaparezca totalmente de la pantalla
     const { data } = await actionSheet.onDidDismiss();
 
-    // Recién ahora, abrimos el modal correspondiente de forma segura
     if (data) {
       if (data === 'asignar') this.abrirModalAsignar(item);
       else if (data === 'devolver') this.abrirModalDevolver(item);
@@ -230,6 +228,7 @@ export class InventarioPage {
     this.funcionarioSeleccionado = null;
     this.isSaving = false;
   }
+
   abrirModalAsignar(equipo: any) {
     this.equipoSeleccionado = equipo;
     this.areaSeleccionada = '';
@@ -239,11 +238,13 @@ export class InventarioPage {
     this.isAsignarModalOpen = true;
     this.cdr.detectChanges();
   }
+
   abrirModalDevolver(item: any) {
     this.equipoParaDevolver = item;
     this.isDevolverModalOpen = true;
     this.cdr.detectChanges();
   }
+
   cerrarModalDevolver() {
     this.isDevolverModalOpen = false;
     this.equipoParaDevolver = null;
@@ -269,8 +270,23 @@ export class InventarioPage {
 
   abrirModalVerAsignados(item: any) {
     this.licenciaParaVer = item;
+    this.textoBusquedaModal = '';
+    this.usuariosAsignadosFiltrados = [...(item.asignados || [])];
     this.isVerAsignadosModalOpen = true;
     this.cdr.detectChanges();
+  }
+
+  filtrarUsuariosModal() {
+    if (!this.textoBusquedaModal.trim()) {
+      this.usuariosAsignadosFiltrados = [...(this.licenciaParaVer.asignados || [])];
+      return;
+    }
+    const termino = this.textoBusquedaModal.toLowerCase();
+    this.usuariosAsignadosFiltrados = (this.licenciaParaVer.asignados || []).filter((u: any) =>
+      (u.nombre || u.nombreCompleto || '').toLowerCase().includes(termino) ||
+      (u.rut || '').toLowerCase().includes(termino) ||
+      (u.area || '').toLowerCase().includes(termino)
+    );
   }
 
   cerrarModalVerAsignados() {
@@ -306,6 +322,8 @@ export class InventarioPage {
       await this.dbService.desvincularLicencia(this.licenciaParaVer.id, persona);
       this.licenciaParaVer.asignados = this.licenciaParaVer.asignados.filter((p: any) => p.rut !== persona.rut);
       this.licenciaParaVer.cantidadDisponible++;
+
+      this.filtrarUsuariosModal();
 
       this.mostrarMensaje('Licencia devuelta al pozo de disponibles', 'success');
       this.cargarInventario();

@@ -1,6 +1,5 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <!-- AQUÍ FORZAMOS LA APARICIÓN DEL MENÚ LATERAL -->
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
@@ -14,13 +13,11 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding background-light">
-
   <div class="welcome-section">
     <h1 class="main-title">Configuración del Sistema</h1>
     <p class="subtitle">Gestión de personal de la organización y accesos al sistema.</p>
   </div>
 
-  <!-- SELECTOR DE PESTAÑAS -->
   <ion-segment [(ngModel)]="viewMode" color="primary" class="ion-margin-bottom">
     <ion-segment-button value="funcionarios">
       <ion-label><ion-icon name="people-outline"></ion-icon> Funcionarios MOP</ion-label>
@@ -30,19 +27,14 @@
     </ion-segment-button>
   </ion-segment>
 
-  <!-- ============================================== -->
-  <!-- VISTA 1: FUNCIONARIOS                          -->
-  <!-- ============================================== -->
+  <!-- VISTA 1: FUNCIONARIOS -->
   <div *ngIf="viewMode === 'funcionarios'">
-
-    <!-- ESCRITORIO: TABLA FUNCIONARIOS -->
     <div class="ion-hide-lg-down">
       <ion-card class="table-card">
         <ion-card-content class="table-container">
           <table class="custom-table">
             <thead>
               <tr><th>RUT</th><th>Nombre Completo</th><th>Área / Unidad</th><th>Cargo</th><th>Correo</th><th style="width: 80px; text-align: center;">Acciones</th></tr>
-
             </thead>
             <tbody>
               <tr *ngFor="let f of listaFuncionarios">
@@ -51,26 +43,21 @@
                 <td>{{ f.area }}</td>
                 <td>{{ f.cargo }}</td>
                 <td>{{ f.correo }}</td>
-
                 <td style="text-align: center;">
-               <ion-button fill="clear" color="medium" (click)="abrirOpcionesFuncionario(f)">
-                 <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
-               </ion-button>
-             </td>
-
+                  <ion-button fill="clear" color="medium" (click)="abrirOpcionesFuncionario(f)">
+                    <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+                  </ion-button>
+                </td>
               </tr>
               <tr *ngIf="listaFuncionarios.length === 0">
-                <td colspan="5" class="ion-text-center">No hay funcionarios registrados.</td>
-
+                <td colspan="6" class="ion-text-center">No hay funcionarios registrados.</td>
               </tr>
-
             </tbody>
           </table>
         </ion-card-content>
       </ion-card>
     </div>
 
-    <!-- MÓVIL: TARJETAS FUNCIONARIOS -->
     <div class="ion-hide-lg-up">
       <ion-card *ngFor="let f of listaFuncionarios" class="shadow-sm ion-margin-bottom mobile-item-card">
         <ion-item lines="full" color="light">
@@ -80,8 +67,8 @@
             <p style="font-size: 0.85rem;">RUT: {{ f.rut }}</p>
           </ion-label>
           <ion-button fill="clear" slot="end" color="dark" (click)="abrirOpcionesFuncionario(f)">
-         <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
-       </ion-button>
+            <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+          </ion-button>
         </ion-item>
         <ion-card-content>
           <p style="margin-bottom: 5px;"><strong style="color: #333;">Área:</strong> {{ f.area }}</p>
@@ -96,7 +83,6 @@
       </ion-card>
     </div>
 
-    <!-- BOTÓN NUEVO FUNCIONARIO -->
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button color="primary" class="fab-extendido" (click)="setModalFuncionario(true)">
         <ion-icon name="add"></ion-icon>
@@ -105,12 +91,8 @@
     </ion-fab>
   </div>
 
-  <!-- ============================================== -->
-  <!-- VISTA 2: USUARIOS DEL SISTEMA                  -->
-  <!-- ============================================== -->
+  <!-- VISTA 2: USUARIOS DEL SISTEMA -->
   <div *ngIf="viewMode === 'usuarios'">
-
-    <!-- ESCRITORIO: TABLA USUARIOS -->
     <div class="ion-hide-lg-down">
       <ion-card class="table-card">
         <ion-card-content class="table-container">
@@ -143,7 +125,6 @@
       </ion-card>
     </div>
 
-    <!-- MÓVIL: TARJETAS USUARIOS -->
     <div class="ion-hide-lg-up">
       <ion-card *ngFor="let u of listaUsuarios" class="shadow-sm ion-margin-bottom mobile-item-card">
         <ion-item lines="full" color="light">
@@ -166,7 +147,6 @@
       </ion-card>
     </div>
 
-    <!-- BOTÓN NUEVO USUARIO -->
     <ion-fab vertical="bottom" horizontal="end" slot="fixed">
       <ion-fab-button color="secondary" class="fab-extendido" (click)="setModalUsuario(true)">
         <ion-icon name="add"></ion-icon>
@@ -175,7 +155,6 @@
     </ion-fab>
   </div>
 
-  <!-- MODAL: CREAR FUNCIONARIO -->
   <ion-modal [isOpen]="isModalFuncionarioOpen" (didDismiss)="setModalFuncionario(false)">
     <ng-template>
       <ion-header>
@@ -206,7 +185,6 @@
     </ng-template>
   </ion-modal>
 
-  <!-- MODAL: CREAR USUARIO SISTEMA -->
   <ion-modal [isOpen]="isModalUsuarioOpen" (didDismiss)="setModalUsuario(false)">
     <ng-template>
       <ion-header>
@@ -230,5 +208,4 @@
       </ion-content>
     </ng-template>
   </ion-modal>
-
 </ion-content>

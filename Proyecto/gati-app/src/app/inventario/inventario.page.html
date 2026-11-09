@@ -34,16 +34,14 @@
             </ion-item>
           </ion-col>
           <ion-col size="12" size-md="4">
-            <ion-searchbar placeholder="Buscar serie, modelo, empleado..." [(ngModel)]="textoBusqueda" (ionInput)="aplicarFiltros()" animated="true"></ion-searchbar>
+            <!-- Texto del Searchbar actualizado -->
+            <ion-searchbar placeholder="Buscar serie o modelo..." [(ngModel)]="textoBusqueda" (ionInput)="aplicarFiltros()" animated="true"></ion-searchbar>
           </ion-col>
         </ion-row>
       </ion-grid>
     </ion-card-content>
   </ion-card>
 
-  <!-- =============================== -->
-  <!-- VISTA DE ESCRITORIO (TABLA) -->
-  <!-- =============================== -->
   <div class="desktop-view ion-hide-lg-down">
     <ion-card class="table-card">
       <ion-card-content class="table-container">
@@ -111,9 +109,6 @@
     </ion-card>
   </div>
 
-  <!-- =============================== -->
-  <!-- VISTA MÓVIL (TARJETAS APILADAS) -->
-  <!-- =============================== -->
   <div class="mobile-view ion-hide-lg-up">
     <ion-card *ngFor="let item of inventarioFiltrado" class="shadow-sm ion-margin-bottom mobile-item-card">
       <ion-item lines="full" color="light">
@@ -170,10 +165,6 @@
       </ion-card-content>
     </ion-card>
   </div>
-
-  <!-- =============================== -->
-  <!-- MODALES COMPLEMENTARIOS -->
-  <!-- =============================== -->
 
   <ion-modal [isOpen]="isAsignarModalOpen" (didDismiss)="cerrarModalAsignar()">
     <ng-template>
@@ -277,6 +268,7 @@
     </ng-template>
   </ion-modal>
 
+  <!-- MODAL: VER USUARIOS ASIGNADOS ACTUALIZADO CON BÚSQUEDA -->
   <ion-modal [isOpen]="isVerAsignadosModalOpen" (didDismiss)="cerrarModalVerAsignados()">
     <ng-template>
       <ion-header>
@@ -288,18 +280,24 @@
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding background-light">
-        <div *ngIf="licenciaParaVer" class="ion-margin-bottom">
-          <h2 style="font-size: 1.2rem; color: #333; margin-bottom: 5px;">{{ licenciaParaVer.identificador }}</h2>
-          <p style="color: #666; margin: 0;">{{ licenciaParaVer.cantidadDisponible }} / {{ licenciaParaVer.cantidadTotal }} asientos libres</p>
+        <div *ngIf="licenciaParaVer" class="ion-margin-bottom" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+          <div>
+            <h2 style="font-size: 1.2rem; color: #333; margin-bottom: 5px;">{{ licenciaParaVer.identificador }}</h2>
+            <p style="color: #666; margin: 0;">{{ licenciaParaVer.cantidadDisponible }} / {{ licenciaParaVer.cantidadTotal }} asientos libres</p>
+          </div>
+          <!-- Barra de búsqueda dentro del Modal -->
+          <ion-searchbar placeholder="Buscar usuario..." [(ngModel)]="textoBusquedaModal" (ionInput)="filtrarUsuariosModal()" style="max-width: 250px; padding: 0; min-height: 40px;"></ion-searchbar>
         </div>
-        <ion-card *ngIf="!licenciaParaVer?.asignados || licenciaParaVer.asignados.length === 0" class="shadow-sm">
+
+        <ion-card *ngIf="usuariosAsignadosFiltrados.length === 0" class="shadow-sm">
           <ion-card-content class="ion-text-center">
             <ion-icon name="people-outline" style="font-size: 3rem; color: #ccc;"></ion-icon>
-            <p>Nadie está usando esta licencia actualmente.</p>
+            <p>No hay usuarios asignados que coincidan con la búsqueda.</p>
           </ion-card-content>
         </ion-card>
-        <ion-list *ngIf="licenciaParaVer?.asignados?.length > 0" class="shadow-sm" style="border-radius: 8px;">
-          <ion-item *ngFor="let persona of licenciaParaVer.asignados; let i = index">
+
+        <ion-list *ngIf="usuariosAsignadosFiltrados.length > 0" class="shadow-sm" style="border-radius: 8px;">
+          <ion-item *ngFor="let persona of usuariosAsignadosFiltrados; let i = index">
             <ion-icon name="person-circle-outline" slot="start" color="medium"></ion-icon>
             <ion-label class="ion-text-wrap">
               <h3 style="font-weight: bold; color: #333;">{{ persona.nombre || persona.nombreCompleto }}</h3>

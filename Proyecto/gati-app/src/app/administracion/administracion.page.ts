@@ -93,27 +93,16 @@ export class AdministracionPage {
     if (!isOpen) this.funcionarioForm.reset();
   }
 
-  // --- NUEVO: FORMATEADOR DE RUT EN TIEMPO REAL ---
   formatearRut(event: any) {
-    // 1. Quitamos todo lo que no sea número o la letra K (mayúscula o minúscula)
     let valor = event.target.value.replace(/[^0-9kK]/g, '');
-
     if (valor.length > 1) {
-      // 2. Separamos el cuerpo del dígito verificador
       let cuerpo = valor.slice(0, -1);
-      let dv = valor.slice(-1).toUpperCase(); // Forzamos la K a mayúscula
-
-      // 3. Le agregamos los puntos al cuerpo cada 3 dígitos
+      let dv = valor.slice(-1).toUpperCase();
       cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
-      // 4. Unimos todo con el guion
       const rutFormateado = `${cuerpo}-${dv}`;
-
-      // 5. Actualizamos el formulario y la vista en tiempo real
       this.funcionarioForm.patchValue({ rut: rutFormateado }, { emitEvent: false });
       event.target.value = rutFormateado;
     } else {
-      // Si solo ha escrito 1 número, lo dejamos tal cual
       this.funcionarioForm.patchValue({ rut: valor }, { emitEvent: false });
       event.target.value = valor;
     }
@@ -121,10 +110,18 @@ export class AdministracionPage {
 
   async guardarFuncionario() {
     if (this.funcionarioForm.invalid) return this.funcionarioForm.markAllAsTouched();
+
+    // Validación de duplicado
+    const rutActual = this.funcionarioForm.value.rut;
+    const existeFuncionario = this.listaFuncionarios.some(f => f.rut === rutActual);
+    if (existeFuncionario) {
+      this.mostrarMensaje(`El RUT ${rutActual} ya se encuentra registrado.`, 'warning');
+      return;
+    }
+
     this.isSaving = true;
 
     try {
-      // Aplicamos toLowerCase y trim al correo antes de guardarlo
       const nuevoFuncionario = {
         ...this.funcionarioForm.value,
         correo: this.funcionarioForm.value.correo.toLowerCase().trim()
@@ -146,31 +143,37 @@ export class AdministracionPage {
     if (!isOpen) this.usuarioForm.reset({ rol: 'Técnico', estado: 'Activo' });
   }
 
-async guardarUsuario() {
+  async guardarUsuario() {
     if (this.usuarioForm.invalid) return this.usuarioForm.markAllAsTouched();
+
+    // Validación de duplicado
+    const correoActual = this.usuarioForm.value.correo.toLowerCase().trim();
+    const existeUsuario = this.listaUsuarios.some(u => u.correo === correoActual);
+    if (existeUsuario) {
+      this.mostrarMensaje(`El usuario ${correoActual} ya tiene acceso registrado.`, 'warning');
+      return;
+    }
+
     this.isSaving = true;
 
     try {
-      // Aplicamos toLowerCase y trim al correo antes de guardarlo
       const nuevoUsuario = {
         ...this.usuarioForm.value,
-        correo: this.usuarioForm.value.correo.toLowerCase().trim()
+        correo: correoActual
       };
 
-      // 1. Guardamos la autorización en la Base de Datos (Firestore)
       await this.dbService.registrarUsuarioSistema(nuevoUsuario);
 
-      // 2. Enviamos el correo de invitación por EmailJS
       try {
         await emailjs.send(
-          'service_xu4p6bf',       // Tu Service ID
-          'template_ok01sni',      // Tu Template ID
+          'service_xu4p6bf',
+          'template_ok01sni',
           {
             to_email: nuevoUsuario.correo,
             rol: nuevoUsuario.rol,
             link_acceso: 'https://gati-mop.web.app/login'
           },
-          '84dnCsFctzHBhcZBA'      // Tu Public Key
+          '84dnCsFctzHBhcZBA'
         );
         this.mostrarMensaje(`Se ha autorizado e invitado a ${nuevoUsuario.correo}.`, 'success');
       } catch (emailError) {
@@ -223,7 +226,6 @@ async guardarUsuario() {
     }
   }
 
-  // --- LÓGICA CON ANIMACIÓN CORREGIDA (onDidDismiss) ---
   async abrirOpcionesUsuario(usuario: any) {
     const currentEmail = this.auth.currentUser?.email;
     if (usuario.correo === currentEmail) {
@@ -240,9 +242,8 @@ async guardarUsuario() {
     } else {
       botones.push({ text: 'Reactivar Cuenta', icon: 'power-outline', data: { accion: 'estado', valor: 'Activo' } });
     }
-    // Agrega este botón a la lista
-    botones.push({ text: 'Eliminar Definitivamente', icon: 'trash-outline', role: 'destructive', data: { accion: 'eliminar' } });
 
+    botones.push({ text: 'Eliminar Definitivamente', icon: 'trash-outline', role: 'destructive', data: { accion: 'eliminar' } });
     botones.push({ text: 'Cancelar', icon: 'close-outline', role: 'cancel' });
 
     const actionSheet = await this.actionSheetCtrl.create({
@@ -252,7 +253,6 @@ async guardarUsuario() {
 
     await actionSheet.present();
 
-    // Esperamos a que la hoja se cierre completamente para evitar congelamiento
     const { data } = await actionSheet.onDidDismiss();
 
     if (data) {
@@ -260,7 +260,7 @@ async guardarUsuario() {
         this.cambiarRolUsuario(usuario, data.valor);
       } else if (data.accion === 'estado') {
         this.cambiarEstadoUsuario(usuario, data.valor);
-      } else if (data.accion === 'eliminar') { // <-- NUEVO
+      } else if (data.accion === 'eliminar') {
         this.eliminarUsuarioFisicamente(usuario);
       }
     }
@@ -289,33 +289,23 @@ async guardarUsuario() {
     await alert.present();
   }
 
-async cambiarRolUsuario(usuario: any, nuevoRol: string) {
+  async cambiarRolUsuario(usuario: any, nuevoRol: string) {
     try {
       await this.dbService.actualizarRolUsuario(usuario.id, nuevoRol);
-
-      // 1. Actualizamos el dato localmente en la memoria de la pantalla
       usuario.rol = nuevoRol;
-
       this.mostrarMensaje(`Rol actualizado a ${nuevoRol} exitosamente.`, 'success');
-
-      // 2. Le decimos a Angular que refresque la vista al instante
       this.cdr.detectChanges();
     } catch (error) {
       this.mostrarMensaje('Error al cambiar el rol.', 'danger');
     }
   }
 
- async cambiarEstadoUsuario(usuario: any, nuevoEstado: string) {
+  async cambiarEstadoUsuario(usuario: any, nuevoEstado: string) {
     try {
       await this.dbService.actualizarEstadoUsuario(usuario.id, nuevoEstado);
-
-      // 1. Actualizamos el estado localmente
       usuario.estado = nuevoEstado;
-
       const colorMsg = nuevoEstado === 'Activo' ? 'success' : 'warning';
       this.mostrarMensaje(`El usuario ahora está ${nuevoEstado}.`, colorMsg);
-
-      // 2. Forzamos la actualización visual
       this.cdr.detectChanges();
     } catch (error) {
       this.mostrarMensaje('Error al cambiar el estado.', 'danger');
